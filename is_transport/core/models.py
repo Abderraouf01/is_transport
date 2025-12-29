@@ -11,6 +11,26 @@ class Client(models.Model):
 
     def __str__(self):
       return f"{self.nom} {self.prenom}"
+    
+
+
+class Expedition(models.Model):
+   STATUT_CHOICES=[('cree','Crée'),
+                   ('transit', 'En transit'),
+                    ('tri','En centre de tri'),
+                     ('livraison', 'En cours de livraison'),
+                      ('livree','Livrée'),
+                       ('echec', 'Echec de livraison'), ]
+   
+   Tracking=models.CharField(max_length=50, unique=True)
+   Statut_expedition=models.CharField(max_length=20,choices=STATUT_CHOICES, default='cree')
+   Date_creation_exp=models.DateTimeField(auto_now_add=True)
+   Description_exp= models.TextField()
+   Montant_expedition= models.DecimalField(max_digits=10, decimal_places=2, default=0)
+   id_client= models.ForeignKey(Client, on_delete=models.CASCADE,related_name='expeditions')
+   def __str__(self):
+      return self.Tracking
+   
 
 
 class Reclamation(models.Model):
@@ -24,9 +44,11 @@ class Reclamation(models.Model):
     date_reclamation = models.DateField(auto_now_add=True)
     etat_reclamation = models.CharField(max_length=20,choices=ETAT_CHOICES,default='en_cours' )
     id_client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='reclamations')
-                                
+    Tracking_Expedition = models.ForeignKey(Expedition,on_delete=models.SET_NULL,null=True,blank=True,related_name='reclamations')                       
     def __str__(self):
       return self.id_reclamation
+    
+
     
 class Chauffeur(models.Model):
     STATUT_CHOICES = [
@@ -44,22 +66,42 @@ class Chauffeur(models.Model):
     date_embauchement = models.DateField()
     def __str__(self):
         return f"{self.nom} {self.prenom}"
+    
+
+
+
+class TypeDeService(models.Model):
+    TYPE_CHOICES = [
+        ('standard', 'Standard'),
+        ('express', 'Express'),
+        ('international', 'International'),
+    ]
+
+    code_service = models.CharField(max_length=20, unique=True)
+    nom_service = models.CharField(max_length=50, choices=TYPE_CHOICES)
+    description_service = models.TextField(blank=True)
+    delai_estime = models.PositiveIntegerField(help_text="Délai estimé en jours")
+    CoefficientService = models.DecimalField(max_digits=4, decimal_places=2)
+
+    def __str__(self):
+        return self.nom_service
+    
 
     
-class Expedition(models.Model):
-   STATUT_CHOICES=[('cree','Crée'),
-                   ('transit', 'En transit'),
-                    ('tri','En centre de tri'),
-                     ('livraison', 'En cours de livraison'),
-                      ('livree','Livrée'),
-                       ('echec', 'Echec de livraison'), ]
-   
-   num_expedition=models.CharField(max_length=50, unique=True)
-   statut_expedition=models.CharField(max_length=20,choices=STATUT_CHOICES, default='cree')
-   date_creation_exp=models.DateTimeField(auto_now_add=True)
-   description_exp= models.TextField()
-   montant_expedition= models.DecimalField(max_digits=10, decimal_places=2, default=0)
-   id_client= models.ForeignKey(Client, on_delete=models.CASCADE,related_name='expeditions')
-   def __str__(self):
-      return self.num_expedition
-   
+class Vehicule(models.Model):
+    ETAT_CHOICES = [
+        ('disponible', 'Disponible'),
+        ('en_panne', 'En panne'),
+        ('en_tournee', 'En tournée'),
+    ]
+
+    immatriculation = models.CharField(max_length=20, unique=True)
+    type_vehicule = models.CharField(max_length=50)
+    capacite_kg = models.FloatField()
+    consommation_litre_100km = models.FloatField()
+    etat_vehicule = models.CharField(max_length=20,choices=ETAT_CHOICES,default='disponible')
+
+    def __str__(self):
+        return self.immatriculation
+
+
