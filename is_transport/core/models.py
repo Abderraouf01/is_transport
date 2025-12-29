@@ -35,6 +35,7 @@ class Chauffeur(models.Model):
     date_embauchement = models.DateField()
     def __str__(self):
         return f"{self.nom} {self.prenom}"
+
     
 class Expedition(models.Model):
    STATUT_CHOICES=[('cree','Crée'),
@@ -52,5 +53,4 @@ class Expedition(models.Model):
    id_client= models.ForeignKey(Client, on_delete=models.CASCADE,related_name='expeditions')
    def __str__(self):
       return self.num_expedition
-
-
+   
