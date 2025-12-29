@@ -14,24 +14,30 @@ class Client(models.Model):
 
 
 class Reclamation(models.Model):
+    ETAT_CHOICES = [
+        ('en_cours', 'en cours de traitement'),
+        ('resolue', 'résolue'),
+        ('annulee', 'annulée'),
+    ]
     id_reclamation = models.CharField(max_length=20, unique=True)
     nature_reclamation = models.CharField(max_length=150)
     date_reclamation = models.DateField(auto_now_add=True)
-    etat_reclamation=[('en_cours','en cours de traitement'),
-                   ('résolue', 'résolue'),
-                    ('annulée','annulée'), ]
+    etat_reclamation = models.CharField(max_length=20,choices=ETAT_CHOICES,default='en_cours' )
     id_client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='reclamations')
                                 
     def __str__(self):
       return self.id_reclamation
     
 class Chauffeur(models.Model):
+    STATUT_CHOICES = [
+        ('disponible', 'disponible'),
+        ('non_disponible', 'non disponible'),
+    ]
     num_permis = models.CharField(max_length=20, unique=True)
     nom_chauffeur = models.CharField(max_length=100)
     prenom_chauffeur = models.CharField(max_length=100)
     adresse_chauffeur = models.TextField()
-    statut_chauffeur =[('disponible','disponible'),
-                    ('non_disponible','non_disponible'), ]
+    statut_chauffeur =models.CharField(max_length=20,choices=STATUT_CHOICES,default='disponible')
     email_chauffeur = models.EmailField(unique=True)
     tel_chauffeur = models.CharField(max_length=10)
     categ_permis = models.CharField(max_length=20)
@@ -45,7 +51,7 @@ class Expedition(models.Model):
                    ('transit', 'En transit'),
                     ('tri','En centre de tri'),
                      ('livraison', 'En cours de livraison'),
-                      ('livre','Livré'),
+                      ('livree','Livrée'),
                        ('echec', 'Echec de livraison'), ]
    
    num_expedition=models.CharField(max_length=50, unique=True)
