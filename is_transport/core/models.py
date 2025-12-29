@@ -104,4 +104,27 @@ class Vehicule(models.Model):
     def __str__(self):
         return self.immatriculation
 
+class suiviExpedition(models.Model):
+    id_suivi= models.CharField(max_length=20, unique=True)
+    date_passage= models.DateTimeField(auto_now_add=True)
+    lieu_passage= models.CharField(max_length=50)
+    commentaire= models.TextField()
+    suivi_expedition= models.ForeignKey(Expedition, on_delete=models.CASCADE, related_name='suivi')
 
+    def __str__(self):
+        return f"Suivi {self.suivi_expedition.Tracking} - {self.lieu_passage}"
+
+class Facture(models.Model):
+    STATUTFCT_CHOICES=[('non_payee', 'Non payée'),
+                    ('partielle','Partiellement payée'),
+                    ('payee', 'Payée'),]
+    id_facture= models.CharField(max_length=20,unique=True)
+    date_facture= models.DateField(auto_now_add=True)
+    montant_HT= models.DecimalField(max_digits=10, decimal_places=2)
+    montant_TVA= models.DecimalField(max_digits=10, decimal_places=2)
+    montant_TTC= models.DecimalField(max_digits=10, decimal_places=2)
+    statut_facture=models.CharField(max_length=20, choices=STATUTFCT_CHOICES, default='non_payee')
+    client= models.ForeignKey(Client, on_delete=models.CASCADE, related_name='factures')
+
+    def __str__(self):
+        return f"Facture {self.id_facture}"
