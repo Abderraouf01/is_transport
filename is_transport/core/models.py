@@ -1,6 +1,5 @@
 from django.db import models
 
-
 class Client(models.Model):
     id_client = models.CharField(max_length=20, unique=True)
     nom = models.CharField(max_length=100)
@@ -13,6 +12,7 @@ class Client(models.Model):
     def __str__(self):
       return f"{self.nom} {self.prenom}"
 
+
 class Reclamation(models.Model):
     id_reclamation = models.CharField(max_length=20, unique=True)
     nature_reclamation = models.CharField(max_length=150)
@@ -22,3 +22,16 @@ class Reclamation(models.Model):
                                 
     def __str__(self):
       return self.id_reclamation
+    
+class Chauffeur(models.Model):
+    num_permis = models.CharField(max_length=20, unique=True)
+    nom_chauffeur = models.CharField(max_length=100)
+    prenom_chauffeur = models.CharField(max_length=100)
+    adresse_chauffeur = models.TextField()
+    statut_chauffeur = models.CharField(max_length=50)
+    email_chauffeur = models.EmailField(unique=True)
+    tel_chauffeur = models.CharField(max_length=10)
+    categ_permis = models.CharField(max_length=20)
+    date_embauchement = models.DateField()
+    def __str__(self):
+        return f"{self.nom} {self.prenom}"
