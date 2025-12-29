@@ -1,6 +1,7 @@
 # virtual env
 venv/
 ourenv/
+env/
 
 # env file
 .env
@@ -11,3 +12,24 @@ __pycache__/
 
 # database
 db.sqlite3
+# OS
+.DS_Store
+
+
+
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Virtual environment
+ourenv/
+venv/
+env/
+
+# Django
+db.sqlite3
+
+# OS
+.DS_Store
+
