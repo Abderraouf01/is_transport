@@ -35,3 +35,22 @@ class Chauffeur(models.Model):
     date_embauchement = models.DateField()
     def __str__(self):
         return f"{self.nom} {self.prenom}"
+    
+class Expedition(models.Model):
+   STATUT_CHOICES=[('cree','Crée'),
+                   ('transit', 'En transit'),
+                    ('tri','En centre de tri'),
+                     ('livraison', 'En cours de livraison'),
+                      ('livre','Livré'),
+                       ('echec', 'Echec de livraison'), ]
+   
+   num_expedition=models.CharField(max_length=50, unique=True)
+   statut_expedition=models.CharField(max_length=20,choices=STATUT_CHOICES, default='cree')
+   date_creation_exp=models.DateTimeField(auto_now_add=True)
+   description_exp= models.TextField()
+   montant_expedition= models.DecimalField(max_digits=10, decimal_places=2, default=0)
+   id_client= models.ForeignKey(Client, on_delete=models.CASCADE,related_name='expeditions')
+   def __str__(self):
+      return self.num_expedition
+
+
