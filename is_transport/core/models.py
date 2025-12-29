@@ -27,7 +27,7 @@ class Expedition(models.Model):
    Date_creation_exp=models.DateTimeField(auto_now_add=True)
    Description_exp= models.TextField()
    Montant_expedition= models.DecimalField(max_digits=10, decimal_places=2, default=0)
-   id_client= models.ForeignKey(Client, on_delete=models.CASCADE,related_name='expeditions')
+   Client= models.ForeignKey(Client, on_delete=models.CASCADE,related_name='expeditions')
    def __str__(self):
       return self.Tracking
    
@@ -43,8 +43,8 @@ class Reclamation(models.Model):
     nature_reclamation = models.CharField(max_length=150)
     date_reclamation = models.DateField(auto_now_add=True)
     etat_reclamation = models.CharField(max_length=20,choices=ETAT_CHOICES,default='en_cours' )
-    id_client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='reclamations')
-    Tracking_Expedition = models.ForeignKey(Expedition,on_delete=models.SET_NULL,null=True,blank=True,related_name='reclamations')                       
+    Client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='reclamations')
+    Expedition = models.ForeignKey(Expedition,on_delete=models.SET_NULL,null=True,blank=True,related_name='reclamations')                       
     def __str__(self):
       return self.id_reclamation
     
@@ -104,4 +104,28 @@ class Vehicule(models.Model):
     def __str__(self):
         return self.immatriculation
 
+class Tournee(models.Model):
+     id_tournee = models.CharField(max_length=20, unique=True)
+     date_tournee = models.DateField()
+     kilometrage = models.FloatField()
+     duree = models.PositiveIntegerField(help_text="duree de la tournee par heurs")
+     note = models.TextField (blank=True, null=True)
+     chauffeur = models.ForeignKey(Chauffeur,to_field='num_permis',on_delete=models.CASCADE)
+     vehicule = models.ForeignKey(Vehicule,to_field='immatriculation',on_delete=models.CASCADE)
+     def __str__(self):
+        return self.id_tournee
+     
+     
+class Incident(models.Model):
+     id_incident = models.CharField(max_length=20, unique=True)
+     type_incident = models.CharField(max_length=100)
+     date_incident = models.DateField()
+     description_incident = models.TextField()
+     tournee = models.ForeignKey(Tournee,to_field='id_tournee',on_delete=models.CASCADE)
+     expedition = models.ForeignKey(Expedition,to_field='Tracking',on_delete=models.CASCADE )
 
+     def __str__(self):
+        return self.id_incident
+
+
+    
