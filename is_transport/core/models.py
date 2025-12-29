@@ -17,7 +17,9 @@ class Reclamation(models.Model):
     id_reclamation = models.CharField(max_length=20, unique=True)
     nature_reclamation = models.CharField(max_length=150)
     date_reclamation = models.DateField(auto_now_add=True)
-    etat_reclamation =models.CharField(max_length=50, default='En cours')
+    etat_reclamation=[('en_cours','en cours de traitement'),
+                   ('résolue', 'résolue'),
+                    ('annulée','annulée'), ]
     id_client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='reclamations')
                                 
     def __str__(self):
@@ -28,7 +30,8 @@ class Chauffeur(models.Model):
     nom_chauffeur = models.CharField(max_length=100)
     prenom_chauffeur = models.CharField(max_length=100)
     adresse_chauffeur = models.TextField()
-    statut_chauffeur = models.CharField(max_length=50)
+    statut_chauffeur =[('disponible','disponible'),
+                    ('non_disponible','non_disponible'), ]
     email_chauffeur = models.EmailField(unique=True)
     tel_chauffeur = models.CharField(max_length=10)
     categ_permis = models.CharField(max_length=20)
