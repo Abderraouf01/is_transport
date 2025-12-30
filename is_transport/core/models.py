@@ -104,7 +104,7 @@ class Vehicule(models.Model):
     def __str__(self):
         return self.immatriculation
 
-<<<<<<< HEAD
+
 class Tournee(models.Model):
      id_tournee = models.CharField(max_length=20, unique=True)
      date_tournee = models.DateField()
@@ -130,7 +130,7 @@ class Incident(models.Model):
 
 
     
-=======
+
 class suiviExpedition(models.Model):
     id_suivi= models.CharField(max_length=20, unique=True)
     date_passage= models.DateTimeField(auto_now_add=True)
@@ -155,4 +155,4 @@ class Facture(models.Model):
 
     def __str__(self):
         return f"Facture {self.id_facture}"
->>>>>>> 481c133dd9b9583f0ce6f0c359ccf7f258d2b82a
+
