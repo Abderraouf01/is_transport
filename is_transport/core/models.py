@@ -13,62 +13,45 @@ class Client(models.Model):
     def __str__(self):
       return f"{self.nom} {self.prenom}"
     
-
-
-class Expedition(models.Model):
-   STATUT_CHOICES=[('cree','Crée'),
-                   ('transit', 'En transit'),
-                    ('tri','En centre de tri'),
-                     ('livraison', 'En cours de livraison'),
-                      ('livree','Livrée'),
-                       ('echec', 'Echec de livraison'), ]
-   
-   tracking=models.CharField(max_length=50, unique=True)
-   statut_expedition=models.CharField(max_length=20,choices=STATUT_CHOICES, default='cree')
-   date_creation_exp=models.DateTimeField(auto_now_add=True)
-   description_exp= models.TextField()
-   montant_expedition= models.DecimalField(max_digits=10, decimal_places=2, default=0)
-   client= models.ForeignKey(Client, on_delete=models.CASCADE,related_name='expeditions')
-   def __str__(self):
-      return self.tracking
-
-
-class TypeDeService(models.Model):
-    TYPE_CHOICES = [
-        ('standard', 'Standard'),
-        ('express', 'Express'),
-        ('international', 'International'),
+class UserProfile(models.Model):
+    ROLE_CHOICES = [
+        ('ADMIN', 'Admin'),
+        ('AGENT', 'Agent'),
+        ('RESP', 'Responsable'),
     ]
 
-    code_service = models.CharField(max_length=20, unique=True)
-    nom_service = models.CharField(max_length=50, choices=TYPE_CHOICES)
-    description_service = models.TextField(blank=True)
-    delai_estime = models.PositiveIntegerField(help_text="Délai estimé en jours")
-    coefficient_service = models.DecimalField(max_digits=4, decimal_places=2)
+    user = models.OneToOneField(User,on_delete=models.CASCADE)
+    role = models.CharField(max_length=10,choices=ROLE_CHOICES)
 
     def __str__(self):
-        return self.nom_service
+        return f"{self.user.username} ({self.role})"
+     
+class Tarification(models.Model):
+    type_service = models.ForeignKey('TypeDeService',on_delete=models.CASCADE,related_name='tarifications',blank=True,null=True)
+    destination = models.ForeignKey('Destination',on_delete=models.CASCADE,related_name='tarifications',blank=True,null=True)
+    tarif_poids = models.DecimalField(max_digits=10, decimal_places=2)
+    tarif_volume = models.DecimalField(max_digits=10, decimal_places=2)
+    tarif_final = models.DecimalField(max_digits=10, decimal_places=2)
 
-
-class Reclamation(models.Model):
-    ETAT_CHOICES = [
-        ('en_cours', 'en cours de traitement'),
-        ('resolue', 'résolue'),
-        ('annulee', 'annulée'),
-    ]
-    id_reclamation = models.CharField(max_length=20, unique=True)
-    nature_reclamation = models.CharField(max_length=150)
-    date_reclamation = models.DateField(auto_now_add=True)
-    etat_reclamation = models.CharField(max_length=20,choices=ETAT_CHOICES,default='en_cours' )
-    client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='reclamations')
-    expedition = models.ForeignKey(Expedition,on_delete=models.SET_NULL,null=True,blank=True,related_name='reclamations')  
-    type_service = models.ForeignKey(TypeDeService,on_delete=models.SET_NULL,null=True,blank=True,related_name='reclamations')                    
 
     def __str__(self):
-      return self.id_reclamation
-    
+     return f"Tarif {self.type_service.nom_service} → {self.destination.ville_dest} : {self.tarif_final}"
+ 
+class Facture(models.Model):
+    STATUTFCT_CHOICES=[('non_payee', 'Non payée'),
+                    ('partielle','Partiellement payée'),
+                    ('payee', 'Payée'),]
+    id_facture= models.CharField(max_length=20,unique=True)
+    date_facture= models.DateField(auto_now_add=True)
+    montant_HT= models.DecimalField(max_digits=10, decimal_places=2)
+    montant_TVA= models.DecimalField(max_digits=10, decimal_places=2)
+    montant_TTC= models.DecimalField(max_digits=10, decimal_places=2)
+    statut_facture=models.CharField(max_length=20, choices=STATUTFCT_CHOICES, default='non_payee')
+    client= models.ForeignKey(Client, on_delete=models.CASCADE, related_name='factures')
 
-    
+    def __str__(self):
+        return f"Facture {self.id_facture}"
+
 class Chauffeur(models.Model):
     STATUT_CHOICES = [
         ('disponible', 'disponible'),
@@ -117,6 +100,64 @@ class Tournee(models.Model):
      def __str__(self):
         return self.id_tournee
      
+
+class Expedition(models.Model):
+   STATUT_CHOICES=[('cree','Crée'),
+                   ('transit', 'En transit'),
+                    ('tri','En centre de tri'),
+                     ('livraison', 'En cours de livraison'),
+                      ('livree','Livrée'),
+                       ('echec', 'Echec de livraison'), ]
+   
+   tracking=models.CharField(max_length=50, unique=True)
+   statut_expedition=models.CharField(max_length=20,choices=STATUT_CHOICES, default='cree')
+   date_creation_exp=models.DateTimeField(auto_now_add=True)
+   description_exp= models.TextField()
+   montant_expedition= models.DecimalField(max_digits=10, decimal_places=2, default=0)
+   client= models.ForeignKey(Client, on_delete=models.CASCADE,related_name='expeditions')
+   tournee=models.ForeignKey(Tournee, on_delete=models.SET_NULL,null=True,blank=True, related_name='expeditions')
+   facture=models.ForeignKey(Facture, on_delete=models.SET_NULL,null=True,blank=True, related_name='expeditions')
+   tarification= models.ForeignKey(Tarification, on_delete=models.PROTECT,null=True,blank=True, related_name='expeditions')
+   user= models.ForeignKey(UserProfile, on_delete=models.SET_NULL,null=True,blank=True, related_name='expeditions')
+   def __str__(self):
+      return self.tracking
+
+
+class TypeDeService(models.Model):
+    TYPE_CHOICES = [
+        ('standard', 'Standard'),
+        ('express', 'Express'),
+        ('international', 'International'),
+    ]
+
+    code_service = models.CharField(max_length=20, unique=True)
+    nom_service = models.CharField(max_length=50, choices=TYPE_CHOICES)
+    description_service = models.TextField(blank=True)
+    delai_estime = models.PositiveIntegerField(help_text="Délai estimé en jours")
+    coefficient_service = models.DecimalField(max_digits=4, decimal_places=2)
+
+    def __str__(self):
+        return self.nom_service
+
+
+class Reclamation(models.Model):
+    ETAT_CHOICES = [
+        ('en_cours', 'en cours de traitement'),
+        ('resolue', 'résolue'),
+        ('annulee', 'annulée'),
+    ]
+    id_reclamation = models.CharField(max_length=20, unique=True)
+    nature_reclamation = models.CharField(max_length=150)
+    date_reclamation = models.DateField(auto_now_add=True)
+    etat_reclamation = models.CharField(max_length=20,choices=ETAT_CHOICES,default='en_cours' )
+    client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='reclamations')
+    expedition = models.ForeignKey(Expedition,on_delete=models.SET_NULL,null=True,blank=True,related_name='reclamations')  
+    type_service = models.ForeignKey(TypeDeService,on_delete=models.SET_NULL,null=True,blank=True,related_name='reclamations')                    
+
+    def __str__(self):
+      return self.id_reclamation
+
+     
      
 class Incident(models.Model):
      id_incident = models.CharField(max_length=20, unique=True)
@@ -142,20 +183,6 @@ class SuiviExpedition(models.Model):
     def __str__(self):
         return f"Suivi {self.suivi_expedition.tracking} - {self.lieu_passage}"
 
-class Facture(models.Model):
-    STATUTFCT_CHOICES=[('non_payee', 'Non payée'),
-                    ('partielle','Partiellement payée'),
-                    ('payee', 'Payée'),]
-    id_facture= models.CharField(max_length=20,unique=True)
-    date_facture= models.DateField(auto_now_add=True)
-    montant_HT= models.DecimalField(max_digits=10, decimal_places=2)
-    montant_TVA= models.DecimalField(max_digits=10, decimal_places=2)
-    montant_TTC= models.DecimalField(max_digits=10, decimal_places=2)
-    statut_facture=models.CharField(max_length=20, choices=STATUTFCT_CHOICES, default='non_payee')
-    client= models.ForeignKey(Client, on_delete=models.CASCADE, related_name='factures')
-
-    def __str__(self):
-        return f"Facture {self.id_facture}"
     
 
 class Destination(models.Model):
@@ -189,18 +216,6 @@ class Paiement(models.Model):
 
     def __str__(self):
         return f"Paiement {self.id_paiement} - {self.montant_paiement}"
-    
-class Tarification(models.Model):
-    type_service = models.ForeignKey('TypeDeService',on_delete=models.CASCADE,related_name='tarifications',blank=True,null=True)
-    destination = models.ForeignKey('Destination',on_delete=models.CASCADE,related_name='tarifications',blank=True,null=True)
-    tarif_poids = models.DecimalField(max_digits=10, decimal_places=2)
-    tarif_volume = models.DecimalField(max_digits=10, decimal_places=2)
-    tarif_final = models.DecimalField(max_digits=10, decimal_places=2)
-
-
-    def __str__(self):
-     return f"Tarif {self.type_service.nom_service} → {self.destination.ville_dest} : {self.tarif_final}"
- 
  
 
 class ColisReclamation(models.Model):
@@ -212,18 +227,6 @@ class ColisReclamation(models.Model):
     
 
 
-class UserProfile(models.Model):
-    ROLE_CHOICES = [
-        ('ADMIN', 'Admin'),
-        ('AGENT', 'Agent'),
-        ('RESP', 'Responsable'),
-    ]
-
-    user = models.OneToOneField(User,on_delete=models.CASCADE)
-    role = models.CharField(max_length=10,choices=ROLE_CHOICES)
-
-    def __str__(self):
-        return f"{self.user.username} ({self.role})"
 
 
 
