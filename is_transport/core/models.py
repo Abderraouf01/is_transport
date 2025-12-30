@@ -155,4 +155,55 @@ class Facture(models.Model):
 
     def __str__(self):
         return f"Facture {self.id_facture}"
+    
+
+class Destination(models.Model):
+   id_destination= models.CharField(max_length=50, unique=True)
+   pays_dest= models.CharField(max_length=50)
+   ville_dest= models.CharField(max_length=50)
+   zone_geographique= models.CharField(max_length=50)
+   tarif_base= models.DecimalField(max_digits=10 , decimal_places=2)
+
+   def __str__(self):
+     return f"{self.ville_dest},{self.pays_dest}"
+   
+class Colis(models.Model):
+   id_colis= models.CharField(max_length=50, unique=True)
+   poids_colis= models.DecimalField(max_digits=10 , decimal_places=2)
+   volume_colis= models.DecimalField(max_digits=10 , decimal_places=2)
+   description_colis= models.TextField()
+   statue_colis= models.CharField(max_length=50)
+   num_expedition= models.ForeignKey('Expedition',on_delete=models.CASCADE,related_name='colis')
+  
+   def __str__(self):
+    return f"colis {self.id_colis} - {self.statue_colis}"
+   
+class Paiement(models.Model):
+    id_paiement = models.CharField(max_length=50,unique=True)
+    mode_paiement = models.CharField(max_length=50)
+    date_paiement = models.DateField()
+    montant_paiement = models.DecimalField(max_digits=10, decimal_places=2)
+    id_client = models.ForeignKey('Client',
+        on_delete=models.CASCADE,
+        related_name='paiements')
+    id_facture = models.ForeignKey('Facture',
+        on_delete=models.CASCADE,
+        related_name='paiements')
+
+    def __str__(self):
+        return f"Paiement {self.id_paiement} - {self.montant_paiement}"
+    
+class Tarification(models.Model):
+    id_typeService = models.ForeignKey('TypeDeService',on_delete=models.CASCADE)
+    id_destination = models.ForeignKey('Destination',on_delete=models.CASCADE)
+    tarif_poids = models.DecimalField(max_digits=10, decimal_places=2)
+    tarif_volume = models.DecimalField(max_digits=10, decimal_places=2)
+    tarif_final = models.DecimalField(max_digits=10, decimal_places=2)
+
+
+    def __str__(self):
+        return f"Tarif {self.id_typeService} → {self.id_destination} : {self.tarif_final}"  
+ 
+  
+   
 
