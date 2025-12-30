@@ -1,7 +1,7 @@
 from django.contrib import admin
 from .models import Client,Reclamation,Chauffeur,Expedition,TypeDeService
 from .models import Vehicule,Tournee,Incident,SuiviExpedition,Facture
-from .models import Destination ,Colis,Tarification,Paiement
+from .models import Destination ,Colis,Tarification,Paiement,UserProfile
 
 admin.site.register(Client)
 admin.site.register(Reclamation)
@@ -17,4 +17,5 @@ admin.site.register(Destination)
 admin.site.register(Colis)
 admin.site.register(Tarification)
 admin.site.register(Paiement)
+admin.site.register(UserProfile)
 
