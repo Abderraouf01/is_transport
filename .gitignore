@@ -2,6 +2,7 @@
 venv/
 ourenv/
 env/
+newenv/
 
 # env file
 .env
