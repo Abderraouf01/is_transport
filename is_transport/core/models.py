@@ -48,6 +48,7 @@ class Facture(models.Model):
     montant_TTC= models.DecimalField(max_digits=10, decimal_places=2)
     statut_facture=models.CharField(max_length=20, choices=STATUTFCT_CHOICES, default='non_payee')
     client= models.ForeignKey(Client, on_delete=models.CASCADE, related_name='factures')
+    user= models.ForeignKey(UserProfile, on_delete=models.SET_NULL, null=True, blank=True, related_name='factures')
 
     def __str__(self):
         return f"Facture {self.id_facture}"
