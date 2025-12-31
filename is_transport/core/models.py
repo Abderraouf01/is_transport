@@ -157,7 +157,16 @@ class Reclamation(models.Model):
 
     def __str__(self):
       return self.id_reclamation
-
+class Colis(models.Model):
+   id_colis= models.CharField(max_length=50, unique=True)
+   poids_colis= models.DecimalField(max_digits=10 , decimal_places=2)
+   volume_colis= models.DecimalField(max_digits=10 , decimal_places=2)
+   description_colis= models.TextField()
+   statue_colis= models.CharField(max_length=50)
+   expedition= models.ForeignKey('Expedition',on_delete=models.CASCADE,related_name='colis')
+  
+   def __str__(self):
+    return f"colis {self.id_colis} - {self.statue_colis}"
      
      
 class Incident(models.Model):
@@ -167,6 +176,7 @@ class Incident(models.Model):
      description_incident = models.TextField()
      tournee = models.ForeignKey(Tournee,to_field='id_tournee',on_delete=models.CASCADE,related_name='incidents')
      expedition = models.ForeignKey(Expedition,to_field='tracking',on_delete=models.CASCADE,related_name='incidents')
+     colis = models.ForeignKey(Colis,to_field='id_colis',on_delete=models.CASCADE,related_name='incidents',null=True,blank=True)
 
      def __str__(self):
         return self.id_incident
@@ -196,16 +206,6 @@ class Destination(models.Model):
    def __str__(self):
      return f"{self.ville_dest},{self.pays_dest}"
    
-class Colis(models.Model):
-   id_colis= models.CharField(max_length=50, unique=True)
-   poids_colis= models.DecimalField(max_digits=10 , decimal_places=2)
-   volume_colis= models.DecimalField(max_digits=10 , decimal_places=2)
-   description_colis= models.TextField()
-   statue_colis= models.CharField(max_length=50)
-   expedition= models.ForeignKey('Expedition',on_delete=models.CASCADE,related_name='colis')
-  
-   def __str__(self):
-    return f"colis {self.id_colis} - {self.statue_colis}"
    
 class Paiement(models.Model):
     id_paiement = models.CharField(max_length=50,unique=True)
