@@ -1,5 +1,21 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.db.models import Sum
+
+class UserProfile(models.Model):
+    ROLE_CHOICES = [
+        ('ADMIN', 'Admin'),
+        ('AGENT', 'Agent'),
+        ('RESP', 'Responsable'),
+    ]
+
+    user = models.OneToOneField(User,on_delete=models.CASCADE)
+    role = models.CharField(max_length=10,choices=ROLE_CHOICES)
+
+    def __str__(self):
+        return f"{self.user.username} ({self.role})"
+
+
 
 class Client(models.Model):
     id_client = models.CharField(max_length=20, unique=True)
@@ -13,29 +29,10 @@ class Client(models.Model):
     def __str__(self):
       return f"{self.nom} {self.prenom}"
     
-class UserProfile(models.Model):
-    ROLE_CHOICES = [
-        ('ADMIN', 'Admin'),
-        ('AGENT', 'Agent'),
-        ('RESP', 'Responsable'),
-    ]
 
-    user = models.OneToOneField(User,on_delete=models.CASCADE)
-    role = models.CharField(max_length=10,choices=ROLE_CHOICES)
 
-    def __str__(self):
-        return f"{self.user.username} ({self.role})"
      
-class Tarification(models.Model):
-    type_service = models.ForeignKey('TypeDeService',on_delete=models.CASCADE,related_name='tarifications',blank=True,null=True)
-    destination = models.ForeignKey('Destination',on_delete=models.CASCADE,related_name='tarifications',blank=True,null=True)
-    tarif_poids = models.DecimalField(max_digits=10, decimal_places=2)
-    tarif_volume = models.DecimalField(max_digits=10, decimal_places=2)
-    tarif_final = models.DecimalField(max_digits=10, decimal_places=2)
 
-
-    def __str__(self):
-     return f"Tarif {self.type_service.nom_service} → {self.destination.ville_dest} : {self.tarif_final}"
  
 class Facture(models.Model):
     STATUTFCT_CHOICES=[('non_payee', 'Non payée'),
@@ -48,7 +45,6 @@ class Facture(models.Model):
     montant_TTC= models.DecimalField(max_digits=10, decimal_places=2)
     statut_facture=models.CharField(max_length=20, choices=STATUTFCT_CHOICES, default='non_payee')
     client= models.ForeignKey(Client, on_delete=models.CASCADE, related_name='factures')
-    user= models.ForeignKey(UserProfile, on_delete=models.SET_NULL, null=True, blank=True, related_name='factures')
 
     def __str__(self):
         return f"Facture {self.id_facture}"
@@ -96,32 +92,23 @@ class Tournee(models.Model):
      kilometrage = models.FloatField()
      duree = models.PositiveIntegerField(help_text="duree de la tournee par heurs")
      note = models.TextField (blank=True, null=True)
-     chauffeur= models.ForeignKey(Chauffeur,to_field='num_permis',on_delete=models.CASCADE, related_name='tournees')
-     vehicule = models.ForeignKey(Vehicule,to_field='immatriculation',on_delete=models.CASCADE,related_name='tournees')
+     chauffeur= models.ForeignKey(Chauffeur,on_delete=models.SET_NULL, related_name='tournees', null=True)
+     vehicule = models.ForeignKey(Vehicule,on_delete=models.SET_NULL,related_name='tournees', null=True)
      def __str__(self):
         return self.id_tournee
      
 
-class Expedition(models.Model):
-   STATUT_CHOICES=[('cree','Crée'),
-                   ('transit', 'En transit'),
-                    ('tri','En centre de tri'),
-                     ('livraison', 'En cours de livraison'),
-                      ('livree','Livrée'),
-                       ('echec', 'Echec de livraison'), ]
-   
-   tracking=models.CharField(max_length=50, unique=True)
-   statut_expedition=models.CharField(max_length=20,choices=STATUT_CHOICES, default='cree')
-   date_creation_exp=models.DateTimeField(auto_now_add=True)
-   description_exp= models.TextField()
-   montant_expedition= models.DecimalField(max_digits=10, decimal_places=2, default=0)
-   client= models.ForeignKey(Client, on_delete=models.CASCADE,related_name='expeditions')
-   tournee=models.ForeignKey(Tournee, on_delete=models.SET_NULL,null=True,blank=True, related_name='expeditions')
-   facture=models.ForeignKey(Facture, on_delete=models.SET_NULL,null=True,blank=True, related_name='expeditions')
-   tarification= models.ForeignKey(Tarification, on_delete=models.PROTECT,null=True,blank=True, related_name='expeditions')
-   user= models.ForeignKey(UserProfile, on_delete=models.SET_NULL,null=True,blank=True, related_name='expeditions')
+
+class Destination(models.Model):
+   id_destination= models.CharField(max_length=50, unique=True)
+   pays_dest= models.CharField(max_length=50)
+   ville_dest= models.CharField(max_length=50)
+   zone_geographique= models.CharField(max_length=50)
+   tarif_base= models.DecimalField(max_digits=10 , decimal_places=2)
+
    def __str__(self):
-      return self.tracking
+     return f"{self.ville_dest},{self.pays_dest}"
+   
 
 
 class TypeDeService(models.Model):
@@ -138,7 +125,55 @@ class TypeDeService(models.Model):
     coefficient_service = models.DecimalField(max_digits=4, decimal_places=2)
 
     def __str__(self):
-        return self.nom_service
+        return self.nom_service   
+
+class Tarification(models.Model):
+    type_service = models.ForeignKey(TypeDeService,on_delete=models.CASCADE,related_name='tarifications')
+    destination = models.ForeignKey(Destination,on_delete=models.CASCADE,related_name='tarifications')
+    tarif_poids = models.DecimalField(max_digits=10, decimal_places=2)
+    tarif_volume = models.DecimalField(max_digits=10, decimal_places=2)
+    tarif_final = models.DecimalField(max_digits=10, decimal_places=2)
+
+
+    def __str__(self):
+     return f"Tarif {self.type_service.nom_service} → {self.destination.ville_dest} : {self.tarif_final}"
+
+
+
+     
+
+class Expedition(models.Model):
+   STATUT_CHOICES=[('cree','Crée'),
+                   ('transit', 'En transit'),
+                    ('tri','En centre de tri'),
+                     ('livraison', 'En cours de livraison'),
+                      ('livree','Livrée'),
+                       ('echec', 'Echec de livraison'), ]
+   
+   tracking=models.CharField(max_length=50, unique=True,editable=False)
+   statut_expedition=models.CharField(max_length=20,choices=STATUT_CHOICES, default='cree')
+   date_creation_exp=models.DateTimeField(auto_now_add=True)
+   description_exp= models.TextField(blank=True, null=True)
+   montant_expedition= models.DecimalField(max_digits=10, decimal_places=2, default=0,editable=False)
+   client= models.ForeignKey(Client, on_delete=models.CASCADE,related_name='expeditions')
+   tournee=models.ForeignKey(Tournee, on_delete=models.SET_NULL, related_name='expeditions', null=True, blank=True)
+   facture=models.ForeignKey(Facture, on_delete=models.SET_NULL, related_name='expeditions', null=True, blank=True)
+   tarification= models.ForeignKey(Tarification, on_delete=models.PROTECT, related_name='expeditions')
+
+   def __str__(self):
+      return self.tracking
+   from django.db.models import Sum
+
+def calculer_montant(self):
+        total_poids = self.colis.aggregate(total=Sum('poids'))['total'] or 0
+        total_volume = self.colis.aggregate(total=Sum('volume'))['total'] or 0
+        destination = self.tarification.destination
+        type_service = self.tarification.type_service
+        tarif_base_reel = destination.tarif_base * type_service.coefficient_service
+        return tarif_base_reel + (total_poids * self.tarification.tarif_poids) + (total_volume * self.tarification.tarif_volume)
+
+
+
 
 
 class Reclamation(models.Model):
@@ -174,9 +209,9 @@ class Incident(models.Model):
      type_incident = models.CharField(max_length=100)
      date_incident = models.DateField()
      description_incident = models.TextField()
-     tournee = models.ForeignKey(Tournee,to_field='id_tournee',on_delete=models.CASCADE,related_name='incidents')
-     expedition = models.ForeignKey(Expedition,to_field='tracking',on_delete=models.CASCADE,related_name='incidents')
-     colis = models.ForeignKey(Colis,to_field='id_colis',on_delete=models.CASCADE,related_name='incidents',null=True,blank=True)
+     tournee = models.ForeignKey(Tournee,on_delete=models.SET_NULL,related_name='incidents',null=True,blank=True)
+     expedition = models.ForeignKey(Expedition,on_delete=models.SET_NULL,related_name='incidents',null=True,blank=True)
+     colis = models.ForeignKey(Colis,on_delete=models.SET_NULL,related_name='incidents',null=True,blank=True)
 
      def __str__(self):
         return self.id_incident
@@ -196,15 +231,7 @@ class SuiviExpedition(models.Model):
 
     
 
-class Destination(models.Model):
-   id_destination= models.CharField(max_length=50, unique=True)
-   pays_dest= models.CharField(max_length=50)
-   ville_dest= models.CharField(max_length=50)
-   zone_geographique= models.CharField(max_length=50)
-   tarif_base= models.DecimalField(max_digits=10 , decimal_places=2)
 
-   def __str__(self):
-     return f"{self.ville_dest},{self.pays_dest}"
    
    
 class Paiement(models.Model):
