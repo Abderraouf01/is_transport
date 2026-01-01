@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models import Sum
+from core.utils import generate_tracking
 
 class UserProfile(models.Model):
     ROLE_CHOICES = [
@@ -164,15 +165,20 @@ class Expedition(models.Model):
       return self.tracking
    from django.db.models import Sum
 
-def calculer_montant(self):
-        total_poids = self.colis.aggregate(total=Sum('poids'))['total'] or 0
-        total_volume = self.colis.aggregate(total=Sum('volume'))['total'] or 0
+   def calculer_montant(self):
+        total_poids = self.colis.aggregate(total=Sum('poids_colis'))['total'] or 0
+        total_volume = self.colis.aggregate(total=Sum('volume_colis'))['total'] or 0
         destination = self.tarification.destination
         type_service = self.tarification.type_service
         tarif_base_reel = destination.tarif_base * type_service.coefficient_service
         return tarif_base_reel + (total_poids * self.tarification.tarif_poids) + (total_volume * self.tarification.tarif_volume)
 
+   def save(self, *args, **kwargs):
+        if not self.tracking:
+            self.tracking = generate_tracking()
 
+        self.montant_expedition = self.calculer_montant()
+        super().save(*args, **kwargs)
 
 
 
