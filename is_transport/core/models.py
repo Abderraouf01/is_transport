@@ -92,8 +92,8 @@ class Tournee(models.Model):
      kilometrage = models.FloatField()
      duree = models.PositiveIntegerField(help_text="duree de la tournee par heurs")
      note = models.TextField (blank=True, null=True)
-     chauffeur= models.ForeignKey(Chauffeur,on_delete=models.SET_NULL, related_name='tournees', null=True)
-     vehicule = models.ForeignKey(Vehicule,on_delete=models.SET_NULL,related_name='tournees', null=True)
+     chauffeur= models.ForeignKey(Chauffeur,on_delete=models.PROTECT, related_name='tournees')
+     vehicule = models.ForeignKey(Vehicule,on_delete=models.PROTECT,related_name='tournees')
      def __str__(self):
         return self.id_tournee
      
@@ -187,8 +187,8 @@ class Reclamation(models.Model):
     date_reclamation = models.DateField(auto_now_add=True)
     etat_reclamation = models.CharField(max_length=20,choices=ETAT_CHOICES,default='en_cours' )
     client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='reclamations')
-    expedition = models.ForeignKey(Expedition,on_delete=models.SET_NULL,null=True,blank=True,related_name='reclamations')  
-    type_service = models.ForeignKey(TypeDeService,on_delete=models.SET_NULL,null=True,blank=True,related_name='reclamations')                    
+    expedition = models.ForeignKey(Expedition,to_field='tracking',on_delete=models.PROTECT,null=True,blank=True,related_name='reclamations')  
+    type_service = models.ForeignKey(TypeDeService,on_delete=models.PROTECT,null=True,blank=True,related_name='reclamations')                    
 
     def __str__(self):
       return self.id_reclamation
@@ -198,7 +198,7 @@ class Colis(models.Model):
    volume_colis= models.DecimalField(max_digits=10 , decimal_places=2)
    description_colis= models.TextField()
    statue_colis= models.CharField(max_length=50)
-   expedition= models.ForeignKey('Expedition',on_delete=models.CASCADE,related_name='colis')
+   expedition= models.ForeignKey('Expedition',to_field='tracking',on_delete=models.CASCADE,related_name='colis')
   
    def __str__(self):
     return f"colis {self.id_colis} - {self.statue_colis}"
@@ -209,9 +209,9 @@ class Incident(models.Model):
      type_incident = models.CharField(max_length=100)
      date_incident = models.DateField()
      description_incident = models.TextField()
-     tournee = models.ForeignKey(Tournee,on_delete=models.SET_NULL,related_name='incidents',null=True,blank=True)
-     expedition = models.ForeignKey(Expedition,on_delete=models.SET_NULL,related_name='incidents',null=True,blank=True)
-     colis = models.ForeignKey(Colis,on_delete=models.SET_NULL,related_name='incidents',null=True,blank=True)
+     tournee = models.ForeignKey(Tournee,on_delete=models.PROTECT,related_name='incidents',null=True,blank=True)
+     expedition = models.ForeignKey(Expedition,to_field='tracking',on_delete=models.PROTECT,related_name='incidents',null=True,blank=True)
+     colis = models.ForeignKey(Colis,on_delete=models.PROTECT,related_name='incidents',null=True,blank=True)
 
      def __str__(self):
         return self.id_incident
@@ -224,7 +224,7 @@ class SuiviExpedition(models.Model):
     date_passage= models.DateTimeField(auto_now_add=True)
     lieu_passage= models.CharField(max_length=50)
     commentaire= models.TextField()
-    suivi_expedition= models.ForeignKey(Expedition, on_delete=models.CASCADE, related_name='suivi')
+    suivi_expedition= models.ForeignKey(Expedition,to_field='tracking', on_delete=models.CASCADE, related_name='suivi')
 
     def __str__(self):
         return f"Suivi {self.suivi_expedition.tracking} - {self.lieu_passage}"
