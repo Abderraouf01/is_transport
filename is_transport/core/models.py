@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models import Sum
+from decimal import Decimal
 from core.utils import generate_tracking
 
 class UserProfile(models.Model):
@@ -41,14 +42,29 @@ class Facture(models.Model):
                     ('payee', 'Payée'),]
     id_facture= models.CharField(max_length=20,unique=True)
     date_facture= models.DateField(auto_now_add=True)
-    montant_HT= models.DecimalField(max_digits=10, decimal_places=2)
-    montant_TVA= models.DecimalField(max_digits=10, decimal_places=2)
-    montant_TTC= models.DecimalField(max_digits=10, decimal_places=2)
+    montant_HT= models.DecimalField(max_digits=10, decimal_places=2,editable=False)
+    montant_TVA= models.DecimalField(max_digits=10, decimal_places=2,editable=False)
+    montant_TTC= models.DecimalField(max_digits=10, decimal_places=2,editable=False)
     statut_facture=models.CharField(max_length=20, choices=STATUTFCT_CHOICES, default='non_payee')
     client= models.ForeignKey(Client, on_delete=models.CASCADE, related_name='factures')
 
     def __str__(self):
         return f"Facture {self.id_facture}"
+    
+    def calculer_montantfct(self):
+       montant_HT=self.expeditions.aggregate(total=Sum('montant_expedition')) ['total'] or 0
+       montant_TVA= montant_HT * Decimal('0.19')
+       montant_TTC= montant_HT + montant_TVA
+       return montant_HT,montant_TVA,montant_TTC
+    
+    def save(self, *args,**kwargs):
+       montant_HT,montant_TVA,montant_TTC=self.calculer_montantfct()
+       self.montant_HT=montant_HT
+       self.montant_TVA=montant_TVA
+       self.montant_TTC=montant_TTC
+       super().save(*args, **kwargs)
+
+
 
 class Chauffeur(models.Model):
     STATUT_CHOICES = [
