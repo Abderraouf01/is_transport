@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models import Sum
+from decimal import Decimal
+from core.utils import generate_tracking
 
 class UserProfile(models.Model):
     ROLE_CHOICES = [
@@ -40,14 +42,29 @@ class Facture(models.Model):
                     ('payee', 'Payée'),]
     id_facture= models.CharField(max_length=20,unique=True)
     date_facture= models.DateField(auto_now_add=True)
-    montant_HT= models.DecimalField(max_digits=10, decimal_places=2)
-    montant_TVA= models.DecimalField(max_digits=10, decimal_places=2)
-    montant_TTC= models.DecimalField(max_digits=10, decimal_places=2)
+    montant_HT= models.DecimalField(max_digits=10, decimal_places=2,editable=False)
+    montant_TVA= models.DecimalField(max_digits=10, decimal_places=2,editable=False)
+    montant_TTC= models.DecimalField(max_digits=10, decimal_places=2,editable=False)
     statut_facture=models.CharField(max_length=20, choices=STATUTFCT_CHOICES, default='non_payee')
     client= models.ForeignKey(Client, on_delete=models.CASCADE, related_name='factures')
 
     def __str__(self):
         return f"Facture {self.id_facture}"
+    
+    def calculer_montantfct(self):
+       montant_HT=self.expeditions.aggregate(total=Sum('montant_expedition')) ['total'] or 0
+       montant_TVA= montant_HT * Decimal('0.19')
+       montant_TTC= montant_HT + montant_TVA
+       return montant_HT,montant_TVA,montant_TTC
+    
+    def save(self, *args,**kwargs):
+       montant_HT,montant_TVA,montant_TTC=self.calculer_montantfct()
+       self.montant_HT=montant_HT
+       self.montant_TVA=montant_TVA
+       self.montant_TTC=montant_TTC
+       super().save(*args, **kwargs)
+
+
 
 class Chauffeur(models.Model):
     STATUT_CHOICES = [
@@ -92,8 +109,8 @@ class Tournee(models.Model):
      kilometrage = models.FloatField()
      duree = models.PositiveIntegerField(help_text="duree de la tournee par heurs")
      note = models.TextField (blank=True, null=True)
-     chauffeur= models.ForeignKey(Chauffeur,on_delete=models.SET_NULL, related_name='tournees', null=True)
-     vehicule = models.ForeignKey(Vehicule,on_delete=models.SET_NULL,related_name='tournees', null=True)
+     chauffeur= models.ForeignKey(Chauffeur,on_delete=models.PROTECT, related_name='tournees')
+     vehicule = models.ForeignKey(Vehicule,on_delete=models.PROTECT,related_name='tournees')
      def __str__(self):
         return self.id_tournee
      
@@ -164,15 +181,20 @@ class Expedition(models.Model):
       return self.tracking
    from django.db.models import Sum
 
-def calculer_montant(self):
-        total_poids = self.colis.aggregate(total=Sum('poids'))['total'] or 0
-        total_volume = self.colis.aggregate(total=Sum('volume'))['total'] or 0
+   def calculer_montant(self):
+        total_poids = self.colis.aggregate(total=Sum('poids_colis'))['total'] or 0
+        total_volume = self.colis.aggregate(total=Sum('volume_colis'))['total'] or 0
         destination = self.tarification.destination
         type_service = self.tarification.type_service
         tarif_base_reel = destination.tarif_base * type_service.coefficient_service
         return tarif_base_reel + (total_poids * self.tarification.tarif_poids) + (total_volume * self.tarification.tarif_volume)
 
+   def save(self, *args, **kwargs):
+        if not self.tracking:
+            self.tracking = generate_tracking()
 
+        self.montant_expedition = self.calculer_montant()
+        super().save(*args, **kwargs)
 
 
 
@@ -187,8 +209,8 @@ class Reclamation(models.Model):
     date_reclamation = models.DateField(auto_now_add=True)
     etat_reclamation = models.CharField(max_length=20,choices=ETAT_CHOICES,default='en_cours' )
     client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='reclamations')
-    expedition = models.ForeignKey(Expedition,on_delete=models.SET_NULL,null=True,blank=True,related_name='reclamations')  
-    type_service = models.ForeignKey(TypeDeService,on_delete=models.SET_NULL,null=True,blank=True,related_name='reclamations')                    
+    expedition = models.ForeignKey(Expedition,to_field='tracking',on_delete=models.PROTECT,null=True,blank=True,related_name='reclamations')  
+    type_service = models.ForeignKey(TypeDeService,on_delete=models.PROTECT,null=True,blank=True,related_name='reclamations')                    
 
     def __str__(self):
       return self.id_reclamation
@@ -198,7 +220,7 @@ class Colis(models.Model):
    volume_colis= models.DecimalField(max_digits=10 , decimal_places=2)
    description_colis= models.TextField()
    statue_colis= models.CharField(max_length=50)
-   expedition= models.ForeignKey('Expedition',on_delete=models.CASCADE,related_name='colis')
+   expedition= models.ForeignKey('Expedition',to_field='tracking',on_delete=models.CASCADE,related_name='colis')
   
    def __str__(self):
     return f"colis {self.id_colis} - {self.statue_colis}"
@@ -209,9 +231,9 @@ class Incident(models.Model):
      type_incident = models.CharField(max_length=100)
      date_incident = models.DateField()
      description_incident = models.TextField()
-     tournee = models.ForeignKey(Tournee,on_delete=models.SET_NULL,related_name='incidents',null=True,blank=True)
-     expedition = models.ForeignKey(Expedition,on_delete=models.SET_NULL,related_name='incidents',null=True,blank=True)
-     colis = models.ForeignKey(Colis,on_delete=models.SET_NULL,related_name='incidents',null=True,blank=True)
+     tournee = models.ForeignKey(Tournee,on_delete=models.PROTECT,related_name='incidents',null=True,blank=True)
+     expedition = models.ForeignKey(Expedition,to_field='tracking',on_delete=models.PROTECT,related_name='incidents',null=True,blank=True)
+     colis = models.ForeignKey(Colis,on_delete=models.PROTECT,related_name='incidents',null=True,blank=True)
 
      def __str__(self):
         return self.id_incident
@@ -224,7 +246,7 @@ class SuiviExpedition(models.Model):
     date_passage= models.DateTimeField(auto_now_add=True)
     lieu_passage= models.CharField(max_length=50)
     commentaire= models.TextField()
-    suivi_expedition= models.ForeignKey(Expedition, on_delete=models.CASCADE, related_name='suivi')
+    suivi_expedition= models.ForeignKey(Expedition,to_field='tracking', on_delete=models.CASCADE, related_name='suivi')
 
     def __str__(self):
         return f"Suivi {self.suivi_expedition.tracking} - {self.lieu_passage}"
