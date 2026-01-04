@@ -52,6 +52,7 @@ class Facture(models.Model):
         return f"Facture {self.id_facture}"
     
     def calculer_montantfct(self):
+       # Une facture agrège plusieurs expéditions
        montant_HT=self.expeditions.aggregate(total=Sum('montant_expedition')) ['total'] or 0
        montant_TVA= montant_HT * Decimal('0.19')
        montant_TTC= montant_HT + montant_TVA
@@ -158,7 +159,7 @@ class Tarification(models.Model):
 
 
      
-
+# Business rules related to expedition lifecycle and pricing
 class Expedition(models.Model):
    STATUT_CHOICES=[('cree','Crée'),
                    ('transit', 'En transit'),
@@ -179,8 +180,6 @@ class Expedition(models.Model):
 
    def __str__(self):
       return self.tracking
-   from django.db.models import Sum
-
    def calculer_montant(self):
         total_poids = self.colis.aggregate(total=Sum('poids_colis'))['total'] or 0
         total_volume = self.colis.aggregate(total=Sum('volume_colis'))['total'] or 0
@@ -195,6 +194,39 @@ class Expedition(models.Model):
 
         self.montant_expedition = self.calculer_montant()
         super().save(*args, **kwargs)
+
+
+   def can_be_deleted(self):
+    return self.tournee is None and self.facture is None
+
+   def can_add_colis(self):
+    return self.statut_expedition == 'cree'
+   
+   def can_change_statut(self, new_statut):
+
+    if self.statut_expedition in ['livree', 'echec']:
+     return False
+    
+    transitions = {
+       'cree': ['transit'],
+       'transit': ['tri'],
+       'tri': ['livraison'],
+       'livraison': ['livree', 'echec'],
+       'livree': [],
+       'echec': [],
+    }
+
+    return new_statut in transitions.get(self.statut_expedition, [])
+   
+   def change_statut(self, new_statut):
+      if not self.can_change_statut(new_statut):
+        raise ValueError("Transition de statut non autorisée")
+
+      self.statut_expedition = new_statut
+      self.save(update_fields=['statut_expedition'])
+
+
+
 
 
 
