@@ -92,7 +92,6 @@ class Facture(models.Model):
         super().delete(*args, **kwargs)
 
 
-
 class Chauffeur(models.Model):
     STATUT_CHOICES = [
         ('disponible', 'disponible'),
@@ -278,13 +277,11 @@ class Colis(models.Model):
    poids_colis= models.DecimalField(max_digits=10 , decimal_places=2)
    volume_colis= models.DecimalField(max_digits=10 , decimal_places=2)
    description_colis= models.TextField()
-   statue_colis= models.CharField(max_length=50)
    expedition= models.ForeignKey('Expedition',to_field='tracking',on_delete=models.CASCADE,related_name='colis')
   
    def __str__(self):
-    return f"colis {self.id_colis} - {self.statue_colis}"
-     
-     
+    return f"colis {self.id_colis}"
+   
 class Incident(models.Model):
      id_incident = models.CharField(max_length=20, unique=True)
      type_incident = models.CharField(max_length=100)
@@ -301,8 +298,9 @@ class Incident(models.Model):
     
 
 class SuiviExpedition(models.Model):
-    id_suivi= models.CharField(max_length=20, unique=True)
+    id_suivi= models.CharField(max_length=20, unique=True,editable=False)
     date_passage= models.DateTimeField(auto_now_add=True)
+    statut = models.CharField(max_length=20, choices=Expedition.STATUT_CHOICES)
     lieu_passage= models.CharField(max_length=50)
     commentaire= models.TextField()
     suivi_expedition= models.ForeignKey(Expedition,to_field='tracking', on_delete=models.CASCADE, related_name='suivi')
@@ -310,7 +308,10 @@ class SuiviExpedition(models.Model):
     def __str__(self):
         return f"Suivi {self.suivi_expedition.tracking} - {self.lieu_passage}"
 
-    
+    def save(self, *args, **kwargs):
+     if not self.id_suivi:
+        self.id_suivi = generate_tracking()
+     super().save(*args, **kwargs)
 
 
    

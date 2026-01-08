@@ -40,7 +40,6 @@ def add_colis(request, tracking):
             poids_colis=request.POST['poids'],
             volume_colis=request.POST['volume'],
             description_colis=request.POST['description'],
-            statue_colis='cree',
             expedition=expedition
         )
 
