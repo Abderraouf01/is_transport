@@ -65,22 +65,33 @@ class Facture(models.Model):
        self.montant_TTC=montant_TTC
        super().save(*args, **kwargs)
 
-def total_paye(self):
-   return self.paiements.aggregate(total=Sum('montant_paiement'))['total'] or 0
+    def total_paye(self):
+        return self.paiements.aggregate(total=Sum('montant_paiement'))['total'] or 0
 
-def reste_payer(self):
-   return self.montant_TTC - self.total_paye()
+    def reste_payer(self):
+         return self.montant_TTC - self.total_paye()
 
-def update_statut(self):
-   total_paye=self.total_paye()
-   if total_paye==0 : 
-      self.statut_facture='non_payee'
-   elif total_paye<self.montant_TTC:
-      self.statut_facture='partielle'
-   else:
-      self.statut_facture='payee'
+    def update_statut(self):
+        total_paye=self.total_paye()
+        if total_paye==0 : 
+         self.statut_facture='non_payee'
+        elif total_paye<self.montant_TTC:
+         self.statut_facture='partielle'
+        else:
+            self.statut_facture='payee'
 
-      self.save(update_fields=['statut_facture'])   
+        self.save(update_fields=['statut_facture'])   
+
+    def delete(self, *args, **kwargs):
+        client=self.client
+        total_paiements= self.paiements.aggregate(total=Sum('montant_paiement'))['total'] or 0
+        montant_restant= self.montant_TTC - total_paiements
+        client.solde-= montant_restant
+        client.save(update_fields=['solde'])
+        self.paiements.all().delete()
+        super().delete(*args, **kwargs)
+
+
 
 class Chauffeur(models.Model):
     STATUT_CHOICES = [
@@ -257,8 +268,9 @@ class Reclamation(models.Model):
     etat_reclamation = models.CharField(max_length=20,choices=ETAT_CHOICES,default='en_cours' )
     client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='reclamations')
     expedition = models.ForeignKey(Expedition,to_field='tracking',on_delete=models.PROTECT,null=True,blank=True,related_name='reclamations')  
-    type_service = models.ForeignKey(TypeDeService,on_delete=models.PROTECT,null=True,blank=True,related_name='reclamations')                    
-
+    type_service = models.ForeignKey(TypeDeService,on_delete=models.PROTECT,null=True,blank=True,related_name='reclamations')
+    facture= models.ForeignKey(Facture, on_delete=models.PROTECT, null=True, blank=True, related_name='reclamations')              
+    agent_responsable= models.ForeignKey(User, on_delete=models.SET_NULL,null=True,blank=True, related_name='reclamations_traitees')
     def __str__(self):
       return self.id_reclamation
 class Colis(models.Model):
@@ -302,7 +314,7 @@ class SuiviExpedition(models.Model):
 
 
    
-   
+
 class Paiement(models.Model):
     id_paiement = models.CharField(max_length=50,unique=True)
     mode_paiement = models.CharField(max_length=50)
@@ -314,13 +326,13 @@ class Paiement(models.Model):
     def __str__(self):
         return f"Paiement {self.id_paiement} - {self.montant_paiement}"
 
-def save(self, *args, **kwargs):
-   super().save(* args, **kwargs)
-   facture=self.facture
-   facture.update_statut()
-   reste= facture.reste_payer()
-   facture.client.solde= max(reste,0)
-   facture.client.save(update_fields=['solde'])
+    def save(self, *args, **kwargs):
+        super().save(* args, **kwargs)
+        facture=self.facture
+        facture.update_statut()
+        reste= facture.reste_payer()
+        facture.client.solde= max(reste,0)
+        facture.client.save(update_fields=['solde'])
 
 
 class ColisReclamation(models.Model):
