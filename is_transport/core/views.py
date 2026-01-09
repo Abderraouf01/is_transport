@@ -85,6 +85,7 @@ def create_facture(request):
     tracking_list= request.POST.getlist('expeditions')
     Expedition.objects.filter(tracking__in=tracking_list).update(facture=facture)
      
+     
     return redirect('detail_facture', id_facture=facture.id_facture)
 
 

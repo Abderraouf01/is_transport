@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404
 from .models import Facture, Paiement
 from django.http import HttpResponse
-from weasyprint import HTML
+# from weasyprint import HTML
 
 
 def journal_factures(request):
@@ -66,7 +66,7 @@ def detail_paiement(request, id_paiement):
 
     return render(request, 'detail_paiement.html',context)
 
-
+"""
 def facture_pdf(request, id_facture):
     facture= get_object_or_404(Facture, id_facture=id_facture)
     expeditions=facture.expeditions.all()
@@ -78,24 +78,27 @@ def facture_pdf(request, id_facture):
         'paiements': paiements,
     }
 
-    html_string= render(request, 'factures/detail_facture.html', context).content.decode('utf-8')
+    html_string= render(request, 'detail_facture.html', context).content.decode('utf-8')
 
     # création du PDF
-    pdf_file= HTML(string=html_string).write_pdf()
+    
+   # pdf_file= HTML(string=html_string).write_pdf()
 
     response = HttpResponse(pdf_file, content_type='application/pdf')
     response['Content-Disposition'] = f'filename="facture_{facture.id_facture}.pdf"'
     return response
-
+"""
+"""
 def paiement_pdf(request, id_paiement):
     paiement=get_object_or_404(Paiement, id_paiement=id_paiement)
     context={'paiement':paiement}
-    html_string= render(request, 'paiements/detail_paiement.html', context).content.decode('utf-8')
+    html_string= render(request, 'detail_paiement.html', context).content.decode('utf-8')
 
     # création du PDF
     pdf_file=HTML(string=html_string).write_pdf()
 
-    # Retourne le PDF au navigateur avec un nom de fichier
+   # Retourne le PDF au navigateur avec un nom de fichier
     response= HttpResponse(pdf_file, content_type='application/pdf')
     response['Content-Disposition'] = f'filename="paiement_{paiement.id_paiement}.pdf"'
-    return response
+    return response 
+"""
