@@ -3,6 +3,9 @@ from django.contrib.auth.models import User
 from django.db.models import Sum
 from decimal import Decimal
 from core.utils import generate_tracking
+from django.utils import timezone
+
+
 
 class UserProfile(models.Model):
     ROLE_CHOICES = [
@@ -83,6 +86,8 @@ class Facture(models.Model):
         self.save(update_fields=['statut_facture'])   
 
     def delete(self, *args, **kwargs):
+        if self.statut_facture == 'payee':
+           raise ValueError("Impossible de supprimer un facture payée")
         client=self.client
         total_paiements= self.paiements.aggregate(total=Sum('montant_paiement'))['total'] or 0
         montant_restant= self.montant_TTC - total_paiements
@@ -264,14 +269,28 @@ class Reclamation(models.Model):
     id_reclamation = models.CharField(max_length=20, unique=True)
     nature_reclamation = models.CharField(max_length=150)
     date_reclamation = models.DateField(auto_now_add=True)
+    date_resolution = models.DateField(null=True, blank=True)
     etat_reclamation = models.CharField(max_length=20,choices=ETAT_CHOICES,default='en_cours' )
     client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='reclamations')
     expedition = models.ForeignKey(Expedition,to_field='tracking',on_delete=models.PROTECT,null=True,blank=True,related_name='reclamations')  
     type_service = models.ForeignKey(TypeDeService,on_delete=models.PROTECT,null=True,blank=True,related_name='reclamations')
     facture= models.ForeignKey(Facture, on_delete=models.PROTECT, null=True, blank=True, related_name='reclamations')              
-    agent_responsable= models.ForeignKey(User, on_delete=models.SET_NULL,null=True,blank=True, related_name='reclamations_traitees')
+    agent_responsable= models.ForeignKey(User, on_delete=models.SET_NULL,null=True,blank=True, related_name='reclamations')
     def __str__(self):
       return self.id_reclamation
+    
+    def changer_etat(self, nouvel_etat, agent=None):
+        if nouvel_etat not in dict(self.ETAT_CHOICES):
+            raise ValueError("État invalide")
+        self.etat_reclamation = nouvel_etat
+
+        if nouvel_etat == 'resolue':
+            self.date_resolution = timezone.now().date()
+
+        if agent:
+            self.agent_responsable = agent
+        self.save(update_fields=['etat_reclamation', 'agent_responsable', 'date_resolution'])
+
 class Colis(models.Model):
    id_colis= models.CharField(max_length=50, unique=True)
    poids_colis= models.DecimalField(max_digits=10 , decimal_places=2)
@@ -328,6 +347,8 @@ class Paiement(models.Model):
         return f"Paiement {self.id_paiement} - {self.montant_paiement}"
 
     def save(self, *args, **kwargs):
+        if self.montant_paiement>self.facture.reste_payer():
+           raise ValueError("Le montant du paiement est supérieur au reste à payer")
         super().save(* args, **kwargs)
         facture=self.facture
         facture.update_statut()
