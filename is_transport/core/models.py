@@ -275,7 +275,16 @@ class Colis(models.Model):
      
 class Incident(models.Model):
      id_incident = models.CharField(max_length=20, unique=True)
-     type_incident = models.CharField(max_length=100)
+     TYPE_INCIDENT_CHOICES = [
+        ('retard', 'Retard'),
+        ('perte', 'Perte'),
+        ('endommagement', 'Endommagement'),
+        ('probleme_technique', 'Problème technique'),]
+
+     type_incident = models.CharField(
+        max_length=30,
+        choices=TYPE_INCIDENT_CHOICES)
+
      date_incident = models.DateField()
      description_incident = models.TextField()
      tournee = models.ForeignKey(Tournee,on_delete=models.PROTECT,related_name='incidents',null=True,blank=True)
@@ -284,6 +293,31 @@ class Incident(models.Model):
 
      def __str__(self):
         return self.id_incident
+     def save(self, *args, **kwargs):
+          super().save(*args, **kwargs)
+          expeditions = []
+          if self.expedition:
+              expeditions.append(self.expedition)
+
+    
+          elif self.colis and self.colis.expedition:
+              expeditions.append(self.colis.expedition)
+          elif self.tournee:
+              expeditions = self.tournee.expeditions.all()
+          for expedition in expeditions:
+              if self.type_incident in ['perte', 'endommagement']:
+                  expedition.statut_expedition = 'echec'
+
+              elif self.type_incident == 'retard':
+                  expedition.statut_expedition = 'transit'
+
+              expedition.save(update_fields=['statut_expedition'])
+              SuiviExpedition.objects.create(
+                  id_suivi=f"SUIV-{self.id_incident}-{expedition.tracking}",
+                  suivi_expedition=expedition,
+                  lieu_passage="Incident déclaré",
+                  commentaire=f"{self.type_incident} : {self.description_incident}" )
+       
 
 
     
