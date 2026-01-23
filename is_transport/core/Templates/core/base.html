@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{% block title %}Système de Gestion de Transport et Livraison {% endblock %}</title>
+    <style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background: linear-gradient(to right, #fbfcfa);
+        min-height: 100vh;
+    }
+    
+    nav {
+        background-color: #2c3e50;
+        padding: 15px 30px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    }
+    
+    nav a {
+        color: white;
+        text-decoration: none;
+        margin-right: 25px;
+        font-size: 18px;
+        padding: 10px 15px;
+        border-radius: 5px;
+        transition: 0.3s;
+    }
+    
+    nav a:hover {
+        background-color: #34495e;
+    }
+    
+    .container {
+        max-width: 800px;
+        margin: 100px auto;
+        padding: 40px;
+        background-color: rgb(147, 154, 219);
+        border-radius: 10px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    }
+    
+    h1 {
+        color: black;
+        padding-bottom: 20px;
+        margin-bottom: 20px;
+    }
+    
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+    
+    th, td {
+        border: 1px solid #ddd;
+        padding: 12px;
+        text-align: left;
+    }
+    
+    th {
+        background-color: #44a7c0;
+        color: white;
+        font-weight: bold;
+    }
+    
+    tr:hover {
+        background-color: #dbe6d7;
+    }
+    
+    .btn {
+        padding: 10px 20px;
+        text-decoration: none;
+        color: white;
+        border-radius: 5px;
+        display: inline-block;
+        margin: 5px;
+        border: none;
+        cursor: pointer;
+        font-size: 14px;
+        transition: 0.3s;
+    }
+    
+    .btn-add { 
+        background-color: #27ae60;
+    }
+    
+    .btn-add:hover {
+        background-color: #229954;
+    }
+    
+    .btn-edit { 
+        background-color: #3498db;
+    }
+    
+    .btn-edit:hover {
+        background-color: #2980b9;
+    }
+    
+    .btn-delete { 
+        background-color: #e74c3c;
+    }
+    
+    .btn-delete:hover {
+        background-color: #c0392b;
+    }
+    
+    form {
+        margin-top: 20px;
+    }
+    
+    form p {
+        margin-bottom: 15px;
+    }
+    
+    label {
+        display: block;
+        font-weight: bold;
+        margin-bottom: 5px;
+        color: #2c3e50;
+    }
+    
+    input[type="text"],
+    input[type="email"],
+    input[type="number"],
+    textarea,
+    select {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 14px;
+    }
+    
+    input:focus,
+    textarea:focus,
+    select:focus {
+        outline: none;
+        border-color: #3498db;
+        box-shadow: 0 0 5px rgba(52,152,219,0.5);
+    }
+</style>
+
+</head>
+<body>
+    <nav>
+        <a href="{% url 'home' %}">Accueil</a>
+        <a href="{% url 'client_list' %}">Clients</a>
+        <a href="{% url 'chauffeur_list' %}">Chauffeurs</a>
+        <a href="{% url 'vehicule_list' %}">Véhicules</a>
+        <a href="{% url 'destination_list' %}">destinations</a>
+        <a href="{% url 'service_list' %}">services</a>
+        <a href="{% url 'tarification_list' %}">tarifications</a>
+
+    </nav>
+    
+    <div class="container">
+        {% block content %}
+        {% endblock %}
+    </div>
+</body>
+</html>

@@ -1,0 +1,39 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+<h1>Liste des destinations</h1>
+<a href="{% url 'destination_create' %}" class="btn btn-add mb-3">Ajouter une destination</a>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Pays</th>
+            <th>Ville</th>
+            <th>Zone géographique</th>
+            <th>Tarif de base</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for destination in destinations %}
+        <tr>
+            <td>{{ destination.id_destination }}</td>
+            <td>{{ destination.pays_dest }}</td>
+            <td>{{ destination.ville_dest }}</td>
+            <td>{{ destination.zone_geographique }}</td>
+            <td>{{ destination.tarif_base }}</td>
+            <td>
+                <a href="{% url 'destination_update' destination.pk %}" class="btn btn-sm btn-warning">Modifier</a>
+                <a href="{% url 'destination_delete' destination.pk %}" class="btn btn-sm btn-danger">Supprimer</a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="6">Aucune destination disponible.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
+            

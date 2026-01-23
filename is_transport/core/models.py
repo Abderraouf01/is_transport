@@ -310,8 +310,8 @@ class Paiement(models.Model):
     mode_paiement = models.CharField(max_length=50)
     date_paiement = models.DateField()
     montant_paiement = models.DecimalField(max_digits=10, decimal_places=2)
-    client = models.ForeignKey('Client',on_delete=models.CASCADE,related_name='paiements')
-    facture = models.ForeignKey('Facture',on_delete=models.CASCADE,related_name='paiements')
+    client = models.ForeignKey('Client',on_delete=models.CASCADE,related_name='paiements' ,db_column='id_client_id' )
+    facture = models.ForeignKey('Facture',on_delete=models.CASCADE,related_name='paiements' , db_column='id_facture_id')
 
     def __str__(self):
         return f"Paiement {self.id_paiement} - {self.montant_paiement}"

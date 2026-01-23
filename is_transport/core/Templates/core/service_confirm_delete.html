@@ -1,0 +1,18 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+<h1>Supprimer le service</h1>
+
+{% if error_message %}
+<p class="text-danger">{{ error_message }}</p>
+{% else %}
+<p>Êtes-vous sûr de vouloir supprimer "{{ service.nom_service }}" ?</p>
+{% endif %}
+
+<form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Oui, supprimer</button>
+    <a href="{% url 'service_list' %}" class="btn btn-secondary">Annuler</a>
+</form>
+{% endblock %}
+        

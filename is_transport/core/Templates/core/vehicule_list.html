@@ -1,0 +1,39 @@
+{% extends 'core/base.html' %}
+
+
+{% block content %}
+<h1>Liste des véhicules</h1>
+<a href="{% url 'vehicule_create' %}" class="btn btn-add">Ajouter un véhicule</a>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Immatriculation</th>
+            <th>Type</th>
+            <th>Capacité (kg)</th>
+            <th>Consommation (L/100km)</th>
+            <th>État</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for vehicule in vehicules %}
+        <tr>
+            <td>{{ vehicule.immatriculation }}</td>
+            <td>{{ vehicule.type_vehicule }}</td>
+            <td>{{ vehicule.capacite_kg }}</td>
+            <td>{{ vehicule.consommation_litre_100km }}</td>
+            <td>{{ vehicule.etat_vehicule }}</td>
+            <td>
+                <a href="{% url 'vehicule_update' vehicule.pk %}" class="btn btn-sm btn-warning">Modifier</a>
+                <a href="{% url 'vehicule_delete' vehicule.pk %}" class="btn btn-sm btn-danger">Supprimer</a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="6">Aucun véhicule disponible.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
