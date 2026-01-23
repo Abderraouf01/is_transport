@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Journal des factures</title>
+</head>
+<body>
+
+<h2>Journal des factures</h2>
+
+<form method="get">
+    Client :
+    <input type="text" name="client" placeholder="ID client">
+
+    Statut :
+    <select name="statut">
+        <option value="">-- Tous --</option>
+        <option value="non_payee">Non payée</option>
+        <option value="partielle">Partielle</option>
+        <option value="payee">Payée</option>
+    </select>
+
+    Date début :
+    <input type="date" name="date_debut">
+
+    Date fin :
+    <input type="date" name="date_fin">
+
+    <button type="submit">Filtrer</button>
+</form>
+
+<br>
+
+<table border="1" cellpadding="8">
+    <tr>
+        <th>ID Facture</th>
+        <th>Client</th>
+        <th>Date</th>
+        <th>Montant TTC</th>
+        <th>Statut</th>
+        <th>Actions</th>
+    </tr>
+
+    {% for facture in factures %}
+    <tr>
+        <td>{{ facture.id_facture }}</td>
+        <td>{{ facture.client }}</td>
+        <td>{{ facture.date_facture }}</td>
+        <td>{{ facture.montant_TTC }}</td>
+        <td>{{ facture.statut_facture }}</td>
+        <td>
+            <a href="{% url 'detail_facture' facture.id_facture %}">Détails</a> |
+            <a href="{% url 'facture_pdf' facture.id_facture %}">PDF</a>
+        </td>
+    </tr>
+    {% empty %}
+    <tr>
+        <td colspan="6">Aucune facture trouvée</td>
+    </tr>
+    {% endfor %}
+</table>
+
+</body>
+</html>

@@ -319,7 +319,7 @@ class Incident(models.Model):
 class SuiviExpedition(models.Model):
     id_suivi= models.CharField(max_length=20, unique=True,editable=False)
     date_passage= models.DateTimeField(auto_now_add=True)
-    statut = models.CharField(max_length=20, choices=Expedition.STATUT_CHOICES)
+    statut = models.CharField(max_length=20, choices=Expedition.STATUT_CHOICES,default='cree')
     lieu_passage= models.CharField(max_length=50)
     commentaire= models.TextField()
     suivi_expedition= models.ForeignKey(Expedition,to_field='tracking', on_delete=models.CASCADE, related_name='suivi')
