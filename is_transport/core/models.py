@@ -3,6 +3,9 @@ from django.contrib.auth.models import User
 from django.db.models import Sum
 from decimal import Decimal
 from core.utils import generate_tracking
+from django.utils import timezone
+
+
 
 class UserProfile(models.Model):
     ROLE_CHOICES = [
@@ -65,22 +68,34 @@ class Facture(models.Model):
        self.montant_TTC=montant_TTC
        super().save(*args, **kwargs)
 
-def total_paye(self):
-   return self.paiements.aggregate(total=Sum('montant_paiement'))['total'] or 0
+    def total_paye(self):
+        return self.paiements.aggregate(total=Sum('montant_paiement'))['total'] or 0
 
-def reste_payer(self):
-   return self.montant_TTC - self.total_paye()
+    def reste_payer(self):
+         return self.montant_TTC - self.total_paye()
 
-def update_statut(self):
-   total_paye=self.total_paye()
-   if total_paye==0 : 
-      self.statut_facture='non_payee'
-   elif total_paye<self.montant_TTC:
-      self.statut_facture='partielle'
-   else:
-      self.statut_facture='payee'
+    def update_statut(self):
+        total_paye=self.total_paye()
+        if total_paye==0 : 
+         self.statut_facture='non_payee'
+        elif total_paye<self.montant_TTC:
+         self.statut_facture='partielle'
+        else:
+            self.statut_facture='payee'
 
-      self.save(update_fields=['statut_facture'])   
+        self.save(update_fields=['statut_facture'])   
+
+    def delete(self, *args, **kwargs):
+        if self.statut_facture == 'payee':
+           raise ValueError("Impossible de supprimer un facture payée")
+        client=self.client
+        total_paiements= self.paiements.aggregate(total=Sum('montant_paiement'))['total'] or 0
+        montant_restant= self.montant_TTC - total_paiements
+        client.solde-= montant_restant
+        client.save(update_fields=['solde'])
+        self.paiements.all().delete()
+        super().delete(*args, **kwargs)
+
 
 class Chauffeur(models.Model):
     STATUT_CHOICES = [
@@ -254,25 +269,38 @@ class Reclamation(models.Model):
     id_reclamation = models.CharField(max_length=20, unique=True)
     nature_reclamation = models.CharField(max_length=150)
     date_reclamation = models.DateField(auto_now_add=True)
+    date_resolution = models.DateField(null=True, blank=True)
     etat_reclamation = models.CharField(max_length=20,choices=ETAT_CHOICES,default='en_cours' )
     client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='reclamations')
     expedition = models.ForeignKey(Expedition,to_field='tracking',on_delete=models.PROTECT,null=True,blank=True,related_name='reclamations')  
-    type_service = models.ForeignKey(TypeDeService,on_delete=models.PROTECT,null=True,blank=True,related_name='reclamations')                    
-
+    type_service = models.ForeignKey(TypeDeService,on_delete=models.PROTECT,null=True,blank=True,related_name='reclamations')
+    facture= models.ForeignKey(Facture, on_delete=models.PROTECT, null=True, blank=True, related_name='reclamations')              
+    agent_responsable= models.ForeignKey(User, on_delete=models.SET_NULL,null=True,blank=True, related_name='reclamations')
     def __str__(self):
       return self.id_reclamation
+    
+    def changer_etat(self, nouvel_etat, agent=None):
+        if nouvel_etat not in dict(self.ETAT_CHOICES):
+            raise ValueError("État invalide")
+        self.etat_reclamation = nouvel_etat
+
+        if nouvel_etat == 'resolue':
+            self.date_resolution = timezone.now().date()
+
+        if agent:
+            self.agent_responsable = agent
+        self.save(update_fields=['etat_reclamation', 'agent_responsable', 'date_resolution'])
+
 class Colis(models.Model):
    id_colis= models.CharField(max_length=50, unique=True)
    poids_colis= models.DecimalField(max_digits=10 , decimal_places=2)
    volume_colis= models.DecimalField(max_digits=10 , decimal_places=2)
    description_colis= models.TextField()
-   statue_colis= models.CharField(max_length=50)
    expedition= models.ForeignKey('Expedition',to_field='tracking',on_delete=models.CASCADE,related_name='colis')
   
    def __str__(self):
-    return f"colis {self.id_colis} - {self.statue_colis}"
-     
-     
+    return f"colis {self.id_colis}"
+   
 class Incident(models.Model):
      id_incident = models.CharField(max_length=20, unique=True)
      TYPE_INCIDENT_CHOICES = [
@@ -323,8 +351,9 @@ class Incident(models.Model):
     
 
 class SuiviExpedition(models.Model):
-    id_suivi= models.CharField(max_length=20, unique=True)
+    id_suivi= models.CharField(max_length=20, unique=True,editable=False)
     date_passage= models.DateTimeField(auto_now_add=True)
+    statut = models.CharField(max_length=20, choices=Expedition.STATUT_CHOICES,default='cree')
     lieu_passage= models.CharField(max_length=50)
     commentaire= models.TextField()
     suivi_expedition= models.ForeignKey(Expedition,to_field='tracking', on_delete=models.CASCADE, related_name='suivi')
@@ -332,11 +361,14 @@ class SuiviExpedition(models.Model):
     def __str__(self):
         return f"Suivi {self.suivi_expedition.tracking} - {self.lieu_passage}"
 
-    
+    def save(self, *args, **kwargs):
+     if not self.id_suivi:
+        self.id_suivi = generate_tracking()
+     super().save(*args, **kwargs)
 
 
    
-   
+
 class Paiement(models.Model):
     id_paiement = models.CharField(max_length=50,unique=True)
     mode_paiement = models.CharField(max_length=50)
@@ -348,13 +380,15 @@ class Paiement(models.Model):
     def __str__(self):
         return f"Paiement {self.id_paiement} - {self.montant_paiement}"
 
-def save(self, *args, **kwargs):
-   super().save(* args, **kwargs)
-   facture=self.facture
-   facture.update_statut()
-   reste= facture.reste_payer()
-   facture.client.solde= max(reste,0)
-   facture.client.save(update_fields=['solde'])
+    def save(self, *args, **kwargs):
+        if self.montant_paiement>self.facture.reste_payer():
+           raise ValueError("Le montant du paiement est supérieur au reste à payer")
+        super().save(* args, **kwargs)
+        facture=self.facture
+        facture.update_statut()
+        reste= facture.reste_payer()
+        facture.client.solde= max(reste,0)
+        facture.client.save(update_fields=['solde'])
 
 
 class ColisReclamation(models.Model):
