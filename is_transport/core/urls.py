@@ -2,7 +2,6 @@ from django.urls import path
 from .import views
 from . import views
 from . import journal_pdf_views
-c5ebad380c5a626053853601dd4164c88b05c948
 
 urlpatterns = [
     path(
@@ -73,6 +72,5 @@ urlpatterns = [
     path('reclamations/<str:id_reclamation>/colis/',views.add_colis_to_reclamation,name='add_colis_to_reclamation'),
 
     path('reclamations/rapport/', journal_pdf_views.rapport_reclamations, name='reclamations_rapport'),
- c5ebad380c5a626053853601dd4164c88b05c948
 
 ]
