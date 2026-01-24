@@ -1,5 +1,5 @@
 from django import forms 
-from .models import Client ,Chauffeur , Vehicule , Destination ,TypeDeService,Tarification 
+from .models import Client ,Chauffeur , Vehicule , Destination ,TypeDeService,Tarification , Incident
 
 class ClientForm (forms.ModelForm):
     class Meta :
@@ -42,3 +42,12 @@ class TarificationForm(forms.ModelForm):
         fields = '__all__'
 
       
+
+class IncidentForm(forms.ModelForm):
+    class Meta:
+        model = Incident
+        fields = ['id_incident', 'type_incident', 'date_incident', 'description_incident', 'tournee', 'expedition', 'colis']
+        widgets = {
+            'date_incident': forms.DateInput(attrs={'type': 'date'}),
+            'description_incident': forms.Textarea(attrs={'rows': 3}),
+        }

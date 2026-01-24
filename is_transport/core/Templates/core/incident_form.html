@@ -1,0 +1,40 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<h1>Ajouter un Incident</h1>
+
+<form method="post">
+    {% csrf_token %}
+    <div class="mb-3">
+        {{ form.id_incident.label_tag }}<br>
+        {{ form.id_incident }}
+    </div>
+    <div class="mb-3">
+        {{ form.type_incident.label_tag }}<br>
+        {{ form.type_incident }}
+    </div>
+    <div class="mb-3">
+        {{ form.date_incident.label_tag }}<br>
+        {{ form.date_incident }}
+    </div>
+    <div class="mb-3">
+        {{ form.description_incident.label_tag }}<br>
+        {{ form.description_incident }}
+    </div>
+    <div class="mb-3">
+        {{ form.tournee.label_tag }}<br>
+        {{ form.tournee }}
+    </div>
+    <div class="mb-3">
+        {{ form.expedition.label_tag }}<br>
+        {{ form.expedition }}
+    </div>
+    <div class="mb-3">
+        {{ form.colis.label_tag }}<br>
+        {{ form.colis }}
+    </div>
+
+    <button type="submit" class="btn btn-success">Enregistrer</button>
+    <a href="{% url 'incident_list' %}" class="btn btn-secondary">Annuler</a>
+</form>
+{% endblock %}

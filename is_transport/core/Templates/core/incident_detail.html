@@ -1,0 +1,18 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<h1>Détails de l’Incident {{ incident.id_incident }}</h1>
+
+<ul class="list-group">
+    <li class="list-group-item"><strong>ID :</strong> {{ incident.id_incident }}</li>
+    <li class="list-group-item"><strong>Type :</strong> {{ incident.get_type_incident_display }}</li>
+    <li class="list-group-item"><strong>Date :</strong> {{ incident.date_incident }}</li>
+    <li class="list-group-item"><strong>Description :</strong> {{ incident.description_incident }}</li>
+    <li class="list-group-item"><strong>Tournée :</strong> {{ incident.tournee }}</li>
+    <li class="list-group-item"><strong>Expedition :</strong> {{ incident.expedition }}</li>
+    <li class="list-group-item"><strong>Colis :</strong> {{ incident.colis }}</li>
+</ul>
+
+<a href="{% url 'incident_list' %}" class="btn btn-secondary mt-3">Retour</a>
+<a href="{% url 'incident_delete' incident.id_incident %}" class="btn btn-danger mt-3">Supprimer</a>
+{% endblock %}

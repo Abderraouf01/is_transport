@@ -1,0 +1,13 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<h1>Supprimer l’Incident {{ incident.id_incident }}</h1>
+
+<p>Êtes-vous sûr de vouloir supprimer cet incident ?</p>
+
+<form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Oui, supprimer</button>
+    <a href="{% url 'incident_list' %}" class="btn btn-secondary">Annuler</a>
+</form>
+{% endblock %}

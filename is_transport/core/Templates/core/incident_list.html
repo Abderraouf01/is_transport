@@ -1,0 +1,41 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<h1>Liste des Incidents</h1>
+
+<a href="{% url 'incident_create' %}" class="btn btn-primary">Ajouter un Incident</a>
+
+<table class="table table-striped mt-3">
+    <thead>
+        <tr>
+            <th>ID Incident</th>
+            <th>Type</th>
+            <th>Date</th>
+            <th>Tournée</th>
+            <th>Expedition</th>
+            <th>Colis</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for incident in incidents %}
+        <tr>
+            <td>{{ incident.id_incident }}</td>
+            <td>{{ incident.get_type_incident_display }}</td>
+            <td>{{ incident.date_incident }}</td>
+            <td>{{ incident.tournee }}</td>
+            <td>{{ incident.expedition }}</td>
+            <td>{{ incident.colis }}</td>
+            <td>
+                <a href="{% url 'incident_detail' incident.id_incident %}" class="btn btn-info btn-sm">Voir</a>
+                <a href="{% url 'incident_delete' incident.id_incident %}" class="btn btn-danger btn-sm">Supprimer</a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="7">Aucun incident trouvé.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

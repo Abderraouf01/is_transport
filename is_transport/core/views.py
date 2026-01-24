@@ -8,6 +8,8 @@ from .forms import VehiculeForm
 from .forms import DestinationForm
 from .forms import TypeDeServiceForm
 from .forms import TarificationForm
+from .forms import IncidentForm
+from .models import Incident
 
 from django.shortcuts import render
 from .models import Client, Expedition, Tarification, Colis, Facture, Reclamation, TypeDeService, Paiement, ColisReclamation
@@ -368,3 +370,29 @@ def changer_etat_reclamation(request, id_reclamation):
 
     return redirect('detail_reclamation', id_reclamation=id_reclamation)
 
+
+
+def incident_list(request):
+    incidents = Incident.objects.all()
+    return render(request, 'core/incident_list.html', {'incidents': incidents})
+
+def incident_create(request):
+    if request.method == 'POST':
+        form = IncidentForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('incident_list')
+    else:
+        form = IncidentForm()
+    return render(request, 'core/incident_form.html', {'form': form})
+
+def incident_detail(request, id_incident):
+    incident = get_object_or_404(Incident, id_incident=id_incident)
+    return render(request, 'core/incident_detail.html', {'incident': incident})
+
+def incident_delete(request, id_incident):
+    incident = get_object_or_404(Incident, id_incident=id_incident)
+    if request.method == 'POST':
+        incident.delete()
+        return redirect('incident_list')
+    return render(request, 'core/incident_confirm_delete.html', {'incident': incident})

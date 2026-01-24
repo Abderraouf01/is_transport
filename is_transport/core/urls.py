@@ -72,5 +72,10 @@ urlpatterns = [
     path('reclamations/<str:id_reclamation>/colis/',views.add_colis_to_reclamation,name='add_colis_to_reclamation'),
 
     path('reclamations/rapport/', journal_pdf_views.rapport_reclamations, name='reclamations_rapport'),
+    
+    path('incidents/', views.incident_list, name='incident_list'),
+    path('incidents/create/', views.incident_create, name='incident_create'),
+    path('incidents/<str:id_incident>/', views.incident_detail, name='incident_detail'),
+    path('incidents/<str:id_incident>/delete/', views.incident_delete, name='incident_delete'),
 
 ]
