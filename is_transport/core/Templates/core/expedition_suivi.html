@@ -1,40 +1,25 @@
-{% extends 'core/base.html' %}
+<h2>Suivi de l’expédition {{ expedition.tracking }}</h2>
 
-{% block title %}Suivi de l'expédition{% endblock %}
+<table border="1" cellpadding="5">
+    <tr>
+        <th>Date</th>
+        <th>Statut</th>
+        <th>Lieu</th>
+        <th>Commentaire</th>
+    </tr>
 
-{% block content %}
-<h1>Suivi de l'expédition</h1>
-
-<p><strong>Tracking :</strong> {{ expedition.tracking }}</p>
-<p><strong>Client :</strong> {{ expedition.client.nom }} {{ expedition.client.prenom }}</p>
-<p><strong>Statut actuel :</strong> {{ expedition.get_statut_expedition_display }}</p>
-
-<h2>Historique de suivi</h2>
-
-<table>
-    <thead>
-        <tr>
-            <th>Date</th>
-            <th>Statut</th>
-            <th>Lieu</th>
-            <th>Commentaire</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for suivi in suivis %}
-        <tr>
-            <td>{{ suivi.date_passage|date:"Y-m-d H:i" }}</td>
-            <td>{{ suivi.get_statut_display }}</td>
-            <td>{{ suivi.lieu_passage }}</td>
-            <td>{{ suivi.commentaire }}</td>
-        </tr>
-        {% empty %}
-        <tr>
-            <td colspan="4">Aucun suivi disponible.</td>
-        </tr>
-        {% endfor %}
-    </tbody>
+    {% for s in suivis %}
+    <tr>
+        <td>{{ s.date_passage|date:"Y-m-d H:i" }}</td>
+        <td>{{ s.get_statut_display }}</td>
+        <td>{{ s.lieu_passage }}</td>
+        <td>{{ s.commentaire }}</td>
+    </tr>
+    {% empty %}
+    <tr>
+        <td colspan="4">Aucun suivi disponible</td>
+    </tr>
+    {% endfor %}
 </table>
 
-<a href="{% url 'expedition_list' %}" class="btn btn-add">Retour</a>
-{% endblock %}
+<a href="{% url 'expedition_detail' expedition.tracking %}">Retour</a>

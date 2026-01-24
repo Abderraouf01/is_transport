@@ -2,8 +2,9 @@
 
 <p><strong>Tracking:</strong> {{ expedition.tracking }}</p>
 <p><strong>Client:</strong> {{ expedition.client }}</p>
-<p><strong>Destination:</strong> {{ expedition.destination }}</p>
-<p><strong>Service:</strong> {{ expedition.type_service }}</p>
+<p><strong>Destination:</strong> {{ expedition.tarification.destination }}</p>
+<p><strong>Service:</strong> {{ expedition.tarification.type_service.nom_service }}</p>
 <p><strong>Statut:</strong> {{ expedition.get_statut_expedition_display }}</p>
+<p><strong>Montant:</strong> {{ expedition.montant_expedition }} DA</p>
 
 <button onclick="window.print()">Imprimer</button>

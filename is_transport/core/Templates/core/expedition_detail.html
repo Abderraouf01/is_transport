@@ -35,14 +35,17 @@
 {% endif %}
 
 <h2>Changer statut</h2>
-{% for code,label in expedition.STATUT_CHOICES %}
-    {% if expedition.can_change_statut code %}
+
+{% if expedition.can_change_statut %}
+    {% for code,label in expedition.STATUT_CHOICES %}
         <a class="btn btn-edit"
            href="{% url 'expedition_change_statut' expedition.tracking code %}">
            {{ label }}
         </a>
-    {% endif %}
-{% endfor %}
+    {% endfor %}
+{% else %}
+    <p style="color:gray;">Statut final — modification impossible</p>
+{% endif %}
 
 <br><br>
 <a href="{% url 'expedition_suivi' expedition.tracking %}" class="btn btn-add">

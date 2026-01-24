@@ -27,6 +27,20 @@
             <option value="{{ c.id }}">{{ c.nom }}</option>
         {% endfor %}
     </select>
+    <select name="destination">
+    <option value="">Destination</option>
+    {% for d in destinations %}
+        <option value="{{ d.id }}">{{ d.ville_dest }}</option>
+    {% endfor %}
+</select>
+
+<select name="service">
+    <option value="">Service</option>
+    {% for s in services %}
+        <option value="{{ s.id }}">{{ s.nom_service }}</option>
+    {% endfor %}
+</select>
+
 
     <button class="btn btn-edit">Filtrer</button>
 </form>

@@ -1,7 +1,7 @@
 
 from pyexpat.errors import messages
 from django.shortcuts import render ,redirect 
-from .models import Client, Expedition, Tarification, Colis ,Chauffeur,Vehicule,Destination,TypeDeService,SuiviExpedition,Facture,Reclamation,Paiement,ColisReclamation
+from .models import Client, Expedition, Tarification, Colis, Tournee ,Chauffeur,Vehicule,Destination,TypeDeService,SuiviExpedition,Facture,Reclamation,Paiement,ColisReclamation
 from django.shortcuts import get_object_or_404,redirect
 from .forms import ClientForm, FactureForm 
 from .forms import ChauffeurForm
@@ -23,17 +23,24 @@ def expedition_create(request):
     if request.method == "POST":
         client_id = request.POST.get("client")
         tarification_id = request.POST.get("tarification")
+        description = request.POST.get("description")
 
-        if client_id and tarification_id:
-            client = get_object_or_404(Client, id=client_id)
-            tarification = get_object_or_404(Tarification, id=tarification_id)
+        client = get_object_or_404(Client, id=client_id)
+        tarification = get_object_or_404(Tarification, id=tarification_id)
 
-            expedition = Expedition.objects.create(
-                client=client,
-                tarification=tarification
-            )
+        expedition = Expedition.objects.create(
+            client=client,
+            tarification=tarification,
+            description_exp=description
+        )
 
-            return redirect('expedition_detail', tracking=expedition.tracking)
+        return redirect('expedition_detail', tracking=expedition.tracking)
+
+    return render(request, 'core/expedition_form.html', {
+        'clients': Client.objects.all(),
+        'tarifications': Tarification.objects.all(),
+    })
+
 
     # fallback: always return a response
     return render(request, 'core/expedition_create.html', {
@@ -59,23 +66,24 @@ def expedition_delete(request, tracking):
 
 
 
-def expedition_change_statut(request, tracking, new_statut):
+def expedition_change_statut(request, tracking, code):
     expedition = get_object_or_404(Expedition, tracking=tracking)
 
-    try:
-        expedition.change_statut(new_statut)
+    if not expedition.can_change_statut:
+        return redirect('expedition_detail', tracking=tracking)
 
-        SuiviExpedition.objects.create(
-            suivi_expedition=expedition,
-            statut=new_statut,
-            lieu_passage="Mise à jour manuelle",
-            commentaire=f"Changement de statut vers {new_statut}"
-        )
+    expedition.statut_expedition = code
+    expedition.save()
 
-    except ValueError:
-        pass
+    SuiviExpedition.objects.create(
+        suivi_expedition=expedition,
+        statut=code,
+        lieu_passage='Mise à jour',
+        commentaire=f'Statut changé vers {code}'
+    )
 
     return redirect('expedition_detail', tracking=tracking)
+
 
 
 
@@ -112,17 +120,50 @@ def expedition_detail(request, tracking):
 
 def expedition_suivi(request, tracking):
     expedition = get_object_or_404(Expedition, tracking=tracking)
-    suivis = expedition.suivi.all().order_by('-date_passage')
+    suivis = SuiviExpedition.objects.filter(
+        suivi_expedition=expedition
+    ).order_by('-date_passage')
 
     return render(request, 'core/expedition_suivi.html', {
         'expedition': expedition,
         'suivis': suivis
     })
 
+
+
 def bon_expedition(request, tracking):
     expedition = get_object_or_404(Expedition, tracking=tracking)
     return render(request, 'core/bon_expedition.html', {
         'expedition': expedition
+    })
+def tournee_create(request):
+    if request.method == 'POST':
+        chauffeur = get_object_or_404(Chauffeur, id=request.POST['chauffeur'])
+        vehicule = get_object_or_404(Vehicule, id=request.POST['vehicule'])
+
+        tournee = Tournee.objects.create(
+            id_tournee=request.POST['id_tournee'],
+            date_tournee=request.POST['date'],
+            kilometrage=request.POST['kilometrage'],
+            duree=request.POST['duree'],
+            chauffeur=chauffeur,
+            vehicule=vehicule
+        )
+
+        expeditions_ids = request.POST.getlist('expeditions')
+
+        for tracking in expeditions_ids:
+            exp = Expedition.objects.get(tracking=tracking)
+            exp.tournee = tournee
+            exp.statut_expedition = 'transit'
+            exp.save()
+
+        return redirect('expedition_list')
+
+    return render(request, 'core/tournee_form.html', {
+        'chauffeurs': Chauffeur.objects.all(),
+        'vehicules': Vehicule.objects.all(),
+        'expeditions': Expedition.objects.filter(tournee__isnull=True)
     })
 
 
@@ -143,7 +184,14 @@ def add_colis(request, tracking):
             expedition=expedition
         )
 
-    return redirect('expedition_detail', tracking=tracking)
+        expedition.save()
+
+        return redirect('expedition_detail', tracking=tracking)
+
+    return render(request, 'core/add_colis.html', {
+        'expedition': expedition
+    })
+
 
 
 

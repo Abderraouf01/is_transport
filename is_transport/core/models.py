@@ -221,34 +221,40 @@ class Expedition(models.Model):
         return tarif_base_reel + (total_poids * self.tarification.tarif_poids) + (total_volume * self.tarification.tarif_volume)
 
    def save(self, *args, **kwargs):
-        if not self.tracking:
-            self.tracking = generate_tracking()
+    if not self.tracking:
+        self.tracking = generate_tracking()
+        is_new = True
+    else:
+        is_new = False
 
-        self.montant_expedition = self.calculer_montant()
-        super().save(*args, **kwargs)
+    super().save(*args, **kwargs)
+
+    if is_new:
+        SuiviExpedition.objects.create(
+            suivi_expedition=self,
+            statut='cree',
+            lieu_passage='Création',
+            commentaire='Expédition créée'
+        )
+
+
+
+
 
 
    def can_be_deleted(self):
     return self.tournee is None and self.facture is None
-
+   @property
    def can_add_colis(self):
     return self.statut_expedition == 'cree'
-   
-   def can_change_statut(self, new_statut):
+   @property
+   def can_change_statut(self):
+    return self.statut_expedition not in ['livre', 'echec']
+   def can_change_to(self, new_statut):
+    if self.statut_expedition in ['livre', 'echec']:
+        return False
+    return True
 
-    if self.statut_expedition in ['livree', 'echec']:
-     return False
-    
-    transitions = {
-       'cree': ['transit'],
-       'transit': ['tri'],
-       'tri': ['livraison'],
-       'livraison': ['livree', 'echec'],
-       'livree': [],
-       'echec': [],
-    }
-
-    return new_statut in transitions.get(self.statut_expedition, [])
    
    def change_statut(self, new_statut):
       if not self.can_change_statut(new_statut):
