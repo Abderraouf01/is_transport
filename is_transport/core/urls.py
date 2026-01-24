@@ -4,11 +4,10 @@ from . import views
 from . import journal_pdf_views
 
 urlpatterns = [
-    path('expedition/<str:tracking>/bon/', views.bon_expedition, name='bon_expedition'),
+    path('expeditions/create/', views.expedition_create, name='expedition_create'),
     path('expeditions/', views.expedition_list, name='expedition_list'),
-    path('expedition/<str:tracking>/', views.expedition_detail, name='expedition_detail'),
-    path('expedition/<str:tracking>/suivi/', views.expedition_suivi, name='expedition_suivi'),
-    path('expeditions/create/', views.create_expedition, name='create_expedition'),
+    path('expeditions/<str:tracking>/', views.expedition_detail, name='expedition_detail'),
+    path('expedition/<str:tracking>/bon/', views.bon_expedition, name='bon_expedition'),
 
     path(
         'expedition/<str:tracking>/statut/<str:new_statut>/',
