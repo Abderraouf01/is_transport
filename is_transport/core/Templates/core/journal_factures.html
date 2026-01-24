@@ -20,7 +20,7 @@
     <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
 
         <select name="client" style="padding: 4px;">
-        <option value="" disabled {% if not request.GET.client %}selected{% endif %}>-- Choisir un client --</option>
+        <option value="" disabled {% if not request.GET.client %}selected{% endif %}> Choisir un client</option>
             {% for c in clients %}
                 <option value="{{ c.id_client }}"
                     {% if request.GET.client == c.id_client|stringformat:"s" %}selected{% endif %}>
@@ -30,7 +30,7 @@
         </select>
 
         <select name="statut" style="padding: 4px;">
-        <option value="" disabled {% if not request.GET.statut %}selected{% endif %}>-- Choisir un statut --</option>
+        <option value="" disabled {% if not request.GET.statut %}selected{% endif %}>Choisir un statut</option>
 
             {% for code, label in statuts %}
                 <option value="{{ code }}"

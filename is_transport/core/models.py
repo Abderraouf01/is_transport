@@ -372,8 +372,15 @@ class SuiviExpedition(models.Model):
    
 
 class Paiement(models.Model):
+    MODE_PAIEMENT_CHOICES = [
+        ('Especes', 'Espèces'),
+        ('Carte', 'Carte bancaire'),
+        ('Virement', 'Virement'),
+        ('Cheque', 'Chèque'),
+    ]
+
     id_paiement = models.CharField(max_length=50,unique=True)
-    mode_paiement = models.CharField(max_length=50)
+    mode_paiement = models.CharField(max_length=20, choices=MODE_PAIEMENT_CHOICES)
     date_paiement = models.DateField()
     montant_paiement = models.DecimalField(max_digits=10, decimal_places=2)
     client = models.ForeignKey('Client',on_delete=models.CASCADE,related_name='paiements' ,db_column='id_client_id' )

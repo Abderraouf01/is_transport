@@ -61,14 +61,18 @@ def journal_paiements(request):
     elif date_fin:
         paiements=paiements.filter(date_paiement__lte=date_fin)
 
-    return render(request, 'journal_paiements.html', {'paiements':paiements })
 
+    return render(request, 'core/journal_paiements.html', {
+        'paiements': paiements,
+        'clients': Client.objects.all(),
+        'modes': Paiement.MODE_PAIEMENT_CHOICES,
+    })
 
 def detail_paiement(request, id_paiement):
     paiement=get_object_or_404(Paiement, id_paiement=id_paiement)
     context={'paiement': paiement}
 
-    return render(request, 'detail_paiement.html',context)
+    return render(request, 'core/detail_paiement.html',context)
 
 def journal_reclamations(request):
     reclamations=Reclamation.objects.all()
@@ -127,7 +131,7 @@ def paiement_pdf(request, id_paiement):
     paiement = get_object_or_404(Paiement, id_paiement=id_paiement)
     context = {'paiement': paiement}
 
-    html_string = render(request, 'detail_paiement.html', context).content.decode('utf-8')
+    html_string = render_to_string('core/paiement_pdf.html', context)
 
     # création du PDF
     pdf_file = HTML(string=html_string).write_pdf()

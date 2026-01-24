@@ -1,0 +1,24 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Détail Paiement{% endblock %}
+
+{% block content %}
+<h1>Détail Paiement {{ paiement.id_paiement }}</h1>
+
+<ul>
+    <li><strong>Client:</strong> {{ paiement.client }}</li>
+    <li><strong>Facture:</strong> {{ paiement.facture }}</li>
+    <li><strong>Date:</strong> {{ paiement.date_paiement }}</li>
+    <li><strong>Montant:</strong> {{ paiement.montant_paiement }} DA</li>
+    <li><strong>Mode:</strong> {{ paiement.mode_paiement }}</li>
+</ul>
+
+<div style="margin-top: 15px;">
+    <a href="{% url 'paiement_pdf' paiement.id_paiement %}" class="btn btn-pdf">Télécharger PDF</a>
+    <a href="{% url 'update_paiement' paiement.id_paiement %}" class="btn btn-edit">Modifier</a>
+    <form method="post" action="{% url 'delete_paiement' paiement.id_paiement %}" style="display:inline;">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-delete" onclick="return confirm('Supprimer ce paiement ?');">Supprimer</button>
+    </form>
+</div>
+{% endblock %}

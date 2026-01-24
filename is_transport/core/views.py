@@ -15,6 +15,7 @@ from django.shortcuts import render
 from .models import Client, Expedition, Tarification, Colis, Facture, Reclamation, TypeDeService, Paiement, ColisReclamation
 from django.shortcuts import get_object_or_404,redirect
 from decimal import Decimal
+from .forms import PaiementForm
 
 
 
@@ -393,19 +394,32 @@ def home(request):
 
 def create_paiement(request):
     if request.method == "POST":
-        client = get_object_or_404(Client, id_client=request.POST.get('client'))
-        facture = get_object_or_404(Facture, id_facture=request.POST.get('facture'))
-        montant = Decimal(request.POST.get('montant'))
-        
-        paiement = Paiement.objects.create(
-        id_paiement = request.POST.get('id_paiement'),
-        mode_paiement=request.POST.get('mode_paiement'),
-        date_paiement=request.POST.get('date_paiement'),
-        montant_paiement=montant,
-        client=client,
-        facture=facture)
+        form = PaiementForm(request.POST)
+        if form.is_valid():
+            paiement = form.save()
+            return redirect('detail_paiement', id_paiement=paiement.id_paiement)
+    else:
+        form = PaiementForm()
 
-        return redirect('detail_paiement', id_paiement=paiement.id_paiement)
+    return render(request, 'core/paiement_form.html', {'form': form, 'title': 'Ajouter Paiement'})
+
+def update_paiement(request, id_paiement):
+    paiement = get_object_or_404(Paiement, id_paiement=id_paiement)
+    if request.method == 'POST':
+        form = PaiementForm(request.POST, instance=paiement)
+        if form.is_valid():
+            form.save()
+            return redirect('detail_paiement', id_paiement=paiement.id_paiement)
+    else:
+        form = PaiementForm(instance=paiement)
+    return render(request, 'core/paiement_form.html', {'form': form, 'title': 'Modifier Paiement'})
+
+def delete_paiement(request, id_paiement):
+    paiement = get_object_or_404(Paiement, id_paiement=id_paiement)
+    paiement.delete()
+    return redirect('journal_paiements')
+    
+
 
 def create_facture(request):
     if request.method == "POST":

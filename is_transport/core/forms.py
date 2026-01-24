@@ -63,3 +63,19 @@ class FactureForm(forms.ModelForm):
     class Meta:
         model = Facture
         fields = ['id_facture', 'client']
+
+class PaiementForm(forms.ModelForm):
+    class Meta:
+        model = Paiement
+        fields = ['id_paiement', 'client', 'facture', 'date_paiement', 'montant_paiement', 'mode_paiement']
+        widgets = {
+            'date_paiement': forms.DateInput(attrs={'type': 'date'}),
+            'mode_paiement': forms.Select(),
+        }
+
+    def clean_montant_paiement(self):
+        montant = self.cleaned_data['montant_paiement']
+        facture = self.cleaned_data.get('facture')
+        if facture and montant > facture.reste_payer():
+            raise forms.ValidationError("Le montant du paiement est supérieur au reste à payer de la facture.")
+        return montant

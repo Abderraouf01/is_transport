@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Reçu Paiement {{ paiement.id_paiement }}</title>
+    <style>
+        body { font-family: Arial; font-size: 14px; }
+        h1 { color: #007bff; text-align: center; }
+        .info { margin: 10px 0; }
+        .section { margin: 20px 0; }
+        table { width: 100%; border-collapse: collapse; }
+        td { padding: 8px; }
+        .total { font-weight: bold; border-top: 2px solid #000; }
+    </style>
+</head>
+<body>
+    <h1>REÇU DE PAIEMENT</h1>
+    
+    <div class="info">
+        <strong>N°:</strong> {{ paiement.id_paiement }}<br>
+        <strong>Date:</strong> {{ paiement.date_paiement|date:"d/m/Y" }}
+    </div>
+
+    <div class="section">
+        <strong>CLIENT:</strong><br>
+        {{ paiement.client.nom }} {{ paiement.client.prenom }}<br>
+        {{ paiement.client.id_client }}
+    </div>
+
+    <div class="section">
+        <strong>FACTURE:</strong> {{ paiement.facture.id_facture }}
+    </div>
+
+    <table>
+        <tr>
+            <td>Mode de paiement:</td>
+            <td>{{ paiement.get_mode_paiement_display }}</td>
+        </tr>
+        <tr>
+            <td>Montant payé:</td>
+            <td>{{ paiement.montant_paiement|floatformat:2 }} DA</td>
+        </tr>
+        <tr class="total">
+            <td>TOTAL:</td>
+            <td>{{ paiement.montant_paiement|floatformat:2 }} DA</td>
+        </tr>
+    </table>
+
+    <div style="margin-top: 50px;">
+        <p>Signature:</p>
+        <p>_________________________</p>
+    </div>
+</body>
+</html>
