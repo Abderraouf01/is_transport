@@ -427,7 +427,7 @@ def home(request):
 
 
 
-ABCD
+
 
 def add_colis(request, tracking):
     expedition = get_object_or_404(Expedition, tracking=tracking)
