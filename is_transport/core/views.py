@@ -386,20 +386,15 @@ def changer_etat_reclamation(request, id_reclamation):
 
     return redirect('detail_reclamation', id_reclamation=id_reclamation)
 
+
+
+
+
 def incident_list(request):
     incidents = Incident.objects.all()
     return render(request, 'core/incident_list.html', {'incidents': incidents})
 
-
-
-
-def add_colis(request, tracking):
-    expedition = get_object_or_404(Expedition, tracking=tracking)
-
-    if not expedition.can_add_colis():
-        return redirect('expedition_detail', tracking=tracking)
-
-
+def incident_create(request):
     if request.method == 'POST':
         form = IncidentForm(request.POST)
         if form.is_valid():
@@ -419,6 +414,37 @@ def incident_delete(request, id_incident):
         incident.delete()
         return redirect('incident_list')
     return render(request, 'core/incident_confirm_delete.html', {'incident': incident})
+
+
+def home(request):
+    expeditions = Expedition.objects.all()  # or .order_by('-id')
+    return render(request, 'core/home.html', {
+        'expeditions': expeditions
+    })
+
+
+
+
+
+
+ABCD
+
+def add_colis(request, tracking):
+    expedition = get_object_or_404(Expedition, tracking=tracking)
+
+    if not expedition.can_add_colis():
+        return redirect('expedition_detail', tracking=tracking)
+
+
+    if request.method == 'POST':
+        form = IncidentForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('incident_list')
+    else:
+        form = IncidentForm()
+    return render(request, 'core/incident_form.html', {'form': form})
+
 
 def client_update(request, pk):
     client = get_object_or_404(Client, pk=pk)
@@ -736,35 +762,3 @@ def home(request):
     incidents = Incident.objects.all()  
     return render(request, 'core/home.html', {'incidents': incidents})
 
-
-def incident_list(request):
-    incidents = Incident.objects.all()
-    return render(request, 'core/incident_list.html', {'incidents': incidents})
-
-def incident_create(request):
-    if request.method == 'POST':
-        form = IncidentForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('incident_list')
-    else:
-        form = IncidentForm()
-    return render(request, 'core/incident_form.html', {'form': form})
-
-def incident_detail(request, id_incident):
-    incident = get_object_or_404(Incident, id_incident=id_incident)
-    return render(request, 'core/incident_detail.html', {'incident': incident})
-
-def incident_delete(request, id_incident):
-    incident = get_object_or_404(Incident, id_incident=id_incident)
-    if request.method == 'POST':
-        incident.delete()
-        return redirect('incident_list')
-    return render(request, 'core/incident_confirm_delete.html', {'incident': incident})
-
-
-def home(request):
-    expeditions = Expedition.objects.all()  # or .order_by('-id')
-    return render(request, 'core/home.html', {
-        'expeditions': expeditions
-    })
