@@ -147,15 +147,6 @@ def add_colis(request, tracking):
 
 
 
-def delete_expedition(request, tracking):
-    expedition = get_object_or_404(Expedition, tracking=tracking)
-
-    if expedition.can_be_deleted():
-        expedition.delete()
-
-    return redirect('expedition_list')
-
-
 def home(request):
     return render(request, 'core/home.html')
 
@@ -456,96 +447,30 @@ def changer_etat_reclamation(request, id_reclamation):
 
     return redirect('detail_reclamation', id_reclamation=id_reclamation)
 
+def incident_list(request):
+    incidents = Incident.objects.all()
+    return render(request, 'core/incident_list.html', {'incidents': incidents})
 
-
-
-from django.shortcuts import render ,redirect 
-from .models import Client, Expedition, Tarification, Colis ,Chauffeur,Vehicule,Destination,TypeDeService
-from django.shortcuts import get_object_or_404,redirect
-from .forms import ClientForm 
-from .forms import ChauffeurForm
-from .forms import VehiculeForm
-from .forms import DestinationForm
-from .forms import TypeDeServiceForm
-from .forms import TarificationForm
-from .forms import IncidentForm
-from .models import Incident
-
-from django.shortcuts import render
-from .models import Client, Expedition, Tarification, Colis, Facture, Reclamation, TypeDeService, Paiement, ColisReclamation
-from django.shortcuts import get_object_or_404,redirect
-from decimal import Decimal
-
-
-
-
-def create_expedition(request):
-    if request.method == "POST":
-        client = get_object_or_404(Client, id=request.POST.get("client"))
-        tarification = get_object_or_404(Tarification, id=request.POST.get("tarification"))
-
-        Expedition.objects.create(
-            client=client,
-            tarification=tarification
-        )
-
-
-
-def expedition_change_statut(request, tracking, new_statut):
-    expedition = get_object_or_404(Expedition, tracking=tracking)
-
-    try:
-        expedition.change_statut(new_statut)
-    except ValueError:
-    
-        pass
-
-    return redirect('expedition_detail', tracking=tracking)
-
-def add_colis(request, tracking):
-    expedition = get_object_or_404(Expedition, tracking=tracking)
-
-    if not expedition.can_add_colis():
-        return redirect('expedition_detail', tracking=tracking)
-
+def incident_create(request):
     if request.method == 'POST':
-        Colis.objects.create(
-            id_colis=request.POST['id_colis'],
-            poids_colis=request.POST['poids'],
-            volume_colis=request.POST['volume'],
-            description_colis=request.POST['description'],
-            expedition=expedition
-        )
-
-    return redirect('expedition_detail', tracking=tracking)
-
-
-
-def delete_expedition(request, tracking):
-    expedition = get_object_or_404(Expedition, tracking=tracking)
-
-    if expedition.can_be_deleted():
-        expedition.delete()
-
-    return redirect('expedition_list')
-
-
-def home(request):
-    return render(request, 'core/home.html')
-
-def client_list(request):
-    clients = Client.objects.all()
-    return render(request, 'core/client_list.html', {'clients': clients})
-
-def client_create(request):
-    if request.method == 'POST':
-        form = ClientForm(request.POST)
+        form = IncidentForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('client_list')
+            return redirect('incident_list')
     else:
-        form = ClientForm()
-    return render(request, 'core/client_form.html', {'form': form, 'title': 'Ajouter un Client'})
+        form = IncidentForm()
+    return render(request, 'core/incident_form.html', {'form': form})
+
+def incident_detail(request, id_incident):
+    incident = get_object_or_404(Incident, id_incident=id_incident)
+    return render(request, 'core/incident_detail.html', {'incident': incident})
+
+def incident_delete(request, id_incident):
+    incident = get_object_or_404(Incident, id_incident=id_incident)
+    if request.method == 'POST':
+        incident.delete()
+        return redirect('incident_list')
+    return render(request, 'core/incident_confirm_delete.html', {'incident': incident})
 
 def client_update(request, pk):
     client = get_object_or_404(Client, pk=pk)
@@ -833,29 +758,4 @@ def home(request):
     incidents = Incident.objects.all()  
     return render(request, 'core/home.html', {'incidents': incidents})
 
-
-def incident_list(request):
-    incidents = Incident.objects.all()
-    return render(request, 'core/incident_list.html', {'incidents': incidents})
-
-def incident_create(request):
-    if request.method == 'POST':
-        form = IncidentForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('incident_list')
-    else:
-        form = IncidentForm()
-    return render(request, 'core/incident_form.html', {'form': form})
-
-def incident_detail(request, id_incident):
-    incident = get_object_or_404(Incident, id_incident=id_incident)
-    return render(request, 'core/incident_detail.html', {'incident': incident})
-
-def incident_delete(request, id_incident):
-    incident = get_object_or_404(Incident, id_incident=id_incident)
-    if request.method == 'POST':
-        incident.delete()
-        return redirect('incident_list')
-    return render(request, 'core/incident_confirm_delete.html', {'incident': incident})
 
