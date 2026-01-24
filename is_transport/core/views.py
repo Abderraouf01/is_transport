@@ -19,22 +19,29 @@ from decimal import Decimal
 
 
 
-def create_expedition(request):
+def expedition_create(request):
     if request.method == "POST":
-        client = get_object_or_404(Client, id=request.POST.get("client"))
-        tarification = get_object_or_404(Tarification, id=request.POST.get("tarification"))
+        client_id = request.POST.get("client")
+        tarification_id = request.POST.get("tarification")
 
-        expedition = Expedition.objects.create(
-            client=client,
-            tarification=tarification
-        )
+        if client_id and tarification_id:
+            client = get_object_or_404(Client, id=client_id)
+            tarification = get_object_or_404(Tarification, id=tarification_id)
 
-        return redirect('expedition_detail', tracking=expedition.tracking)
+            expedition = Expedition.objects.create(
+                client=client,
+                tarification=tarification
+            )
 
+            return redirect('expedition_detail', tracking=expedition.tracking)
+
+    # fallback: always return a response
     return render(request, 'core/expedition_create.html', {
         'clients': Client.objects.all(),
         'tarifications': Tarification.objects.all(),
     })
+
+
 
 
 
