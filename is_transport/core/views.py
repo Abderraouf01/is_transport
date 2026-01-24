@@ -253,7 +253,7 @@ def tarification_create(request):
             return redirect('tarification_list')
     else:
         form = TarificationForm()
-    return render(request, 'core/tarification_form.html', {'form': form})
+    return render(request, 'core/tarification_form.html', {'form': form, 'action': 'Ajouter'})
 
 
 def tarification_update(request, pk):
