@@ -355,40 +355,6 @@ def tarification_delete(request, pk):
 
 
 
-def delete_facture(request, id_facture):
-    facture=get_object_or_404(Facture, id_facture=id_facture)
-    facture.delete()
-    return redirect('journal_factures')
-
-
-def add_colis_to_reclamation(request, id_reclamation):
-    reclamation = get_object_or_404(Reclamation, id_reclamation=id_reclamation)
-
-    if request.method == 'POST':
-        listid_colis = request.POST.getlist('colis')
-
-        for id_colis in listid_colis:
-            colis = get_object_or_404(Colis, id_colis=id_colis)
-            ColisReclamation.objects.create(
-                reclamation=reclamation,
-                colis=colis
-            )
-
-    return redirect('detail_reclamation', id_reclamation=id_reclamation)
-
-
-def changer_etat_reclamation(request, id_reclamation):
-    reclamation = get_object_or_404(Reclamation, id_reclamation=id_reclamation)
-
-    if request.method == 'POST':
-        nouvel_etat = request.POST.get('etat')
-        reclamation.changer_etat(nouvel_etat, agent=request.user)
-
-    return redirect('detail_reclamation', id_reclamation=id_reclamation)
-
-
-
-
 
 def incident_list(request):
     incidents = Incident.objects.all()
@@ -704,7 +670,10 @@ def update_facture(request, id_facture):
     })
 
 
-
+def delete_facture(request, id_facture):
+    facture=get_object_or_404(Facture, id_facture=id_facture)
+    facture.delete()
+    return redirect('journal_factures')
 
 
 
