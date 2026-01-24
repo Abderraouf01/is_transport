@@ -136,7 +136,7 @@ class Vehicule(models.Model):
 
 class Tournee(models.Model):
      id_tournee = models.CharField(max_length=20, unique=True)
-     date_tournee = models.DateField()git status
+     date_tournee = models.DateField()
 
      kilometrage = models.FloatField()
      duree = models.PositiveIntegerField(help_text="duree de la tournee par heurs")

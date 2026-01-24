@@ -4,7 +4,6 @@ from django.http import HttpResponse
 from weasyprint import HTML
 from django.db.models import Count, Avg, F, ExpressionWrapper, DurationField
 from django.utils.timezone import now
-from datetime import timedelta
 
 
 def journal_factures(request):

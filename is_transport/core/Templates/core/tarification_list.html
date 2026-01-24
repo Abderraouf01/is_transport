@@ -16,7 +16,7 @@
         </tr>
     </thead>
     <tbody>
-        {% for tarification in tarification %}
+        {% for tarification in tarifications %}
         <tr>
             <td>{{ tarification.type_service.nom_service }}</td>
             <td>{{ tarification.Destination.ville_dest }} ( {{ tarification.destination.pays_dest }})</td>
