@@ -87,6 +87,10 @@
     .card-tarifications { border-left: 4px solid #1abc9c; }
     .card-tarifications:hover { border-color: #1abc9c; }
     .card-tarifications .menu-card-icon { color: #1abc9c; }
+    .card-incidents { border-left: 4px solid #e67e22; }
+    .card-incidents:hover { border-color: #e67e22; }
+    .card-incidents .menu-card-icon { color: #e67e22; }
+
 </style>
 
 <div class="dashboard-header">
@@ -129,6 +133,12 @@
         <h3>Tarifications</h3>
         <p>Gérer les tarifs et prix</p>
     </a>
+    <a href="{% url 'incident_list' %}" class="menu-card card-incidents">
+    <div class="menu-card-icon">🚨</div>
+    <h3>Incidents</h3>
+    <p>Voir et gérer les incidents</p>
+</a>
+
 </div>
 
 {% endblock %}

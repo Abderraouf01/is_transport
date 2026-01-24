@@ -73,6 +73,7 @@ urlpatterns = [
 
     path('reclamations/rapport/', journal_pdf_views.rapport_reclamations, name='reclamations_rapport'),
     
+    path('', views.home, name='home'),
     path('incidents/', views.incident_list, name='incident_list'),
     path('incidents/create/', views.incident_create, name='incident_create'),
     path('incidents/<str:id_incident>/', views.incident_detail, name='incident_detail'),
