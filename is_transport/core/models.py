@@ -45,9 +45,9 @@ class Facture(models.Model):
                     ('payee', 'Payée'),]
     id_facture= models.CharField(max_length=20,unique=True)
     date_facture= models.DateField(auto_now_add=True)
-    montant_HT= models.DecimalField(max_digits=10, decimal_places=2,editable=False)
-    montant_TVA= models.DecimalField(max_digits=10, decimal_places=2,editable=False)
-    montant_TTC= models.DecimalField(max_digits=10, decimal_places=2,editable=False)
+    montant_HT= models.DecimalField(max_digits=10, decimal_places=2,editable=False, default=0)
+    montant_TVA= models.DecimalField(max_digits=10, decimal_places=2,editable=False, default=0)
+    montant_TTC= models.DecimalField(max_digits=10, decimal_places=2,editable=False, default=0)
     statut_facture=models.CharField(max_length=20, choices=STATUTFCT_CHOICES, default='non_payee')
     client= models.ForeignKey(Client, on_delete=models.CASCADE, related_name='factures')
 
@@ -61,12 +61,13 @@ class Facture(models.Model):
        montant_TTC= montant_HT + montant_TVA
        return montant_HT,montant_TVA,montant_TTC
     
-    def save(self, *args,**kwargs):
-       montant_HT,montant_TVA,montant_TTC=self.calculer_montantfct()
-       self.montant_HT=montant_HT
-       self.montant_TVA=montant_TVA
-       self.montant_TTC=montant_TTC
-       super().save(*args, **kwargs)
+    def recalculer(self):
+        montant_HT, montant_TVA, montant_TTC = self.calculer_montantfct()
+        self.montant_HT = montant_HT
+        self.montant_TVA = montant_TVA
+        self.montant_TTC = montant_TTC
+        self.save(update_fields=['montant_HT', 'montant_TVA', 'montant_TTC'])
+    
 
     def total_paye(self):
         return self.paiements.aggregate(total=Sum('montant_paiement'))['total'] or 0

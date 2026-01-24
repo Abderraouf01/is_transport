@@ -1,10 +1,10 @@
 from django.shortcuts import render, get_object_or_404
-from .models import Facture, Paiement, Reclamation
+from .models import Facture, Paiement, Reclamation,Client
 from django.http import HttpResponse
 from weasyprint import HTML
 from django.db.models import Count, Avg, F, ExpressionWrapper, DurationField
 from django.utils.timezone import now
-
+from django.template.loader import render_to_string
 
 def journal_factures(request):
     factures=Facture.objects.all()
@@ -26,9 +26,11 @@ def journal_factures(request):
         factures=factures.filter(date_facture__lte=date_fin)
         
     context= {
-        'factures': factures}
+        'factures': factures,
+        'clients': Client.objects.all(),
+        'statuts': Facture.STATUTFCT_CHOICES,}
 
-    return render(request, 'journal_factures.html', context)
+    return render(request, 'core/journal_factures.html', context)
 
 def detail_facture(request,id_facture):
     facture=get_object_or_404(Facture, id_facture=id_facture)
@@ -38,7 +40,7 @@ def detail_facture(request,id_facture):
              'expeditions':expeditions,
              'paiements':paiements,
              }
-    return render(request, 'detail_facture.html', context)
+    return render(request, 'core/detail_facture.html', context)
 
 def journal_paiements(request):
     paiements=Paiement.objects.all()
@@ -101,13 +103,15 @@ def facture_pdf(request, id_facture):
     expeditions = facture.expeditions.all()
     paiements = facture.paiements.all()
     
+    facture.recalculer()
+    
     context = {
         'facture': facture,
         'expeditions': expeditions,
         'paiements': paiements,
     }
 
-    html_string = render(request, 'detail_facture.html', context).content.decode('utf-8')
+    html_string = render_to_string('core/facture_pdf.html', context)
 
     # création du PDF
     pdf_file = HTML(string=html_string).write_pdf()

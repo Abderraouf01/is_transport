@@ -1,0 +1,47 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Détail Facture{% endblock %}
+
+{% block content %}
+<h1>Facture {{ facture.id_facture }}</h1>
+
+<p><strong>Client :</strong> {{ facture.client }}</p>
+<p><strong>Date :</strong> {{ facture.date_facture }}</p>
+<p><strong>Montant :</strong> {{ facture.montant_total }} DA</p>
+
+<h2>Expéditions facturées</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>Tracking</th>
+            <th>Destination</th>
+            <th>Prix</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for exp in expeditions %}
+        <tr>
+            <td>{{ exp.tracking }}</td>
+            <td>{{ exp.destination }}</td>
+            <td>{{ exp.prix }} DA</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="3">Aucune expédition</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<a href="{% url 'update_facture' facture.id_facture %}" class="btn btn-edit">
+    Modifier
+</a>
+    <a href="{% url 'facture_pdf' facture.id_facture %}" class="btn btn-add" target="_blank">
+        Télécharger PDF
+    </a>
+    
+<a href="{% url 'journal_factures' %}" class="btn btn-add">
+    Retour
+</a>
+{% endblock %}
