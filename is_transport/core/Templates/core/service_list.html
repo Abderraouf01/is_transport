@@ -1,0 +1,38 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+<h1>Liste des services</h1>
+<a href="{% url 'Service_create' %}" class="btn btn-add mb-3">Ajouter un service</a>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Code</th>
+            <th>Nom du service</th>
+            <th>Description</th>
+            <th>Délai estimé (jours)</th>
+            <th>Coefficient</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for service in service %}
+        <tr>
+            <td>{{ service.code_service }}</td>
+            <td>{{ service.nom_service }}</td>
+            <td>{{ service.description_service }}</td>
+            <td>{{ service.delai_estime }}</td>
+            <td>{{ service.coefficient_service }}</td>
+            <td>
+                <a href="{% url 'service_update' service.pk %}" class="btn btn-sm btn-warning">Modifier</a>
+                <a href="{% url 'service_delete' service.pk %}" class="btn btn-sm btn-danger">Supprimer</a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="6">Aucun service disponible.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

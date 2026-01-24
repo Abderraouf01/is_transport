@@ -1,0 +1,38 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+<h1>Liste des tarifications </h1>
+<a href="{% url 'tarification_create' %}" class="btn btn-add mb-3">Ajouter une tarification</a>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Service</th>
+            <th>Destination</th>
+            <th>Tarif poids</th>
+            <th>Tarif volume</th>
+            <th>Tarif final</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for tarification in tarification %}
+        <tr>
+            <td>{{ tarification.type_service.nom_service }}</td>
+            <td>{{ tarification.Destination.ville_dest }} ( {{ tarification.destination.pays_dest }})</td>
+            <td>{{ tarification.tarif_poids }}</td>
+            <td>{{ tarification.tarif_volume }}</td>
+            <td>{{ tarification.tarif_final }}</td>
+            <td>
+                <a href="{% url 'tarification_update' tarification.pk %}" class="btn btn-sm btn-warning">Modifier</a>
+                <a href="{% url 'tarification_delete' tarification.pk %}" class="btn btn-sm btn-danger">Supprimer</a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="6">Aucune tarification disponible.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

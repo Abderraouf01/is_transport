@@ -1,0 +1,134 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Accueil{% endblock %}
+
+{% block content %}
+<style>
+    .dashboard-header {
+        text-align: center;
+        margin-bottom: 40px;
+        padding: 20px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .dashboard-header h1 {
+        margin: 0;
+        font-size: 2rem;
+        font-weight: 600;
+    }
+
+    .menu-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 25px;
+        margin-top: 30px;
+    }
+
+    .menu-card {
+        background: white;
+        border-radius: 12px;
+        padding: 30px;
+        text-align: center;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        text-decoration: none;
+        color: inherit;
+        display: block;
+        border: 2px solid transparent;
+    }
+
+    .menu-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+        border-color: #667eea;
+    }
+
+    .menu-card-icon {
+        font-size: 3rem;
+        margin-bottom: 15px;
+    }
+
+    .menu-card h3 {
+        margin: 0 0 10px 0;
+        font-size: 1.3rem;
+        color: #333;
+    }
+
+    .menu-card p {
+        margin: 0;
+        color: #666;
+        font-size: 0.9rem;
+    }
+
+
+    .card-clients { border-left: 4px solid #3498db; }
+    .card-clients:hover { border-color: #3498db; }
+    .card-clients .menu-card-icon { color: #3498db; }
+
+    .card-chauffeurs { border-left: 4px solid #2ecc71; }
+    .card-chauffeurs:hover { border-color: #2ecc71; }
+    .card-chauffeurs .menu-card-icon { color: #2ecc71; }
+
+    .card-vehicules { border-left: 4px solid #e74c3c; }
+    .card-vehicules:hover { border-color: #e74c3c; }
+    .card-vehicules .menu-card-icon { color: #e74c3c; }
+
+    .card-destinations { border-left: 4px solid #f39c12; }
+    .card-destinations:hover { border-color: #f39c12; }
+    .card-destinations .menu-card-icon { color: #f39c12; }
+
+    .card-services { border-left: 4px solid #9b59b6; }
+    .card-services:hover { border-color: #9b59b6; }
+    .card-services .menu-card-icon { color: #9b59b6; }
+
+    .card-tarifications { border-left: 4px solid #1abc9c; }
+    .card-tarifications:hover { border-color: #1abc9c; }
+    .card-tarifications .menu-card-icon { color: #1abc9c; }
+</style>
+
+<div class="dashboard-header">
+    <h1>🚚 Système de Gestion de Transport et Livraison</h1>
+</div>
+
+<div class="menu-grid">
+    <a href="{% url 'client_list' %}" class="menu-card card-clients">
+        <div class="menu-card-icon">👥</div>
+        <h3>Clients</h3>
+        <p>Gérer les informations des clients</p>
+    </a>
+
+    <a href="{% url 'chauffeur_list' %}" class="menu-card card-chauffeurs">
+        <div class="menu-card-icon">👨‍✈️</div>
+        <h3>Chauffeurs</h3>
+        <p>Gérer les chauffeurs et leurs affectations</p>
+    </a>
+
+    <a href="{% url 'vehicule_list' %}" class="menu-card card-vehicules">
+        <div class="menu-card-icon">🚗</div>
+        <h3>Véhicules</h3>
+        <p>Gérer la flotte de véhicules</p>
+    </a>
+
+    <a href="{% url 'destination_list' %}" class="menu-card card-destinations">
+        <div class="menu-card-icon">📍</div>
+        <h3>Destinations</h3>
+        <p>Gérer les destinations et itinéraires</p>
+    </a>
+
+    <a href="{% url 'service_list' %}" class="menu-card card-services">
+        <div class="menu-card-icon">📦</div>
+        <h3>Services</h3>
+        <p>Gérer les services de transport</p>
+    </a>
+
+    <a href="{% url 'tarification_list' %}" class="menu-card card-tarifications">
+        <div class="menu-card-icon">💰</div>
+        <h3>Tarifications</h3>
+        <p>Gérer les tarifs et prix</p>
+    </a>
+</div>
+
+{% endblock %}

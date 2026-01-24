@@ -1,0 +1,17 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+<h1>Supprimer la destination</h1>
+
+{% if error_message %}
+<p class="text-danger">{{ error_message }}</p>
+{% else %}
+<p>Êtes-vous sûr de vouloir supprimer "{{ destination.ville_dest }}, {{ destination.pays_dest }}" ?</p>
+{% endif %}
+
+<form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Oui, supprimer</button>
+    <a href="{% url 'destination_list' %}" class="btn btn-secondary">Annuler</a>
+</form>
+{% endblock %}

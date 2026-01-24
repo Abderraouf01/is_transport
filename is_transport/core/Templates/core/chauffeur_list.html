@@ -1,0 +1,18 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Chauffeurs{% endblock %}
+
+{% block content %}
+<h2>Liste des Chauffeurs</h2>
+<ul>
+    {% for chauffeur in chauffeurs %}
+        <li>{{ chauffeur.nom }} - {{ chauffeur.telephone }}
+            <a href="{% url 'chauffeur_update' chauffeur.id %}">Modifier</a>
+            <a href="{% url 'chauffeur_delete' chauffeur.id %}">Supprimer</a>
+        </li>
+    {% empty %}
+        <li>Aucun chauffeur trouvé.</li>
+    {% endfor %}
+</ul>
+<a href="{% url 'chauffeur_create' %}">Ajouter un chauffeur</a>
+{% endblock %}
