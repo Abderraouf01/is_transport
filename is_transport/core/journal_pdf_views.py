@@ -91,7 +91,9 @@ def journal_reclamations(request):
         reclamations = reclamations.filter(date_reclamation__gte=date_debut)
     elif date_fin:
         reclamations = reclamations.filter(date_reclamation__lte=date_fin)
-    return render(request, 'journal_reclamations.html', {'reclamations': reclamations})
+    return render(request, 'core/journal_reclamations.html', {'reclamations': reclamations,
+                                                              'etats': Reclamation.ETAT_CHOICES,
+                                                              'clients': Client.objects.all()})
 
 def detail_reclamation(request, id_reclamation):
     reclamation= get_object_or_404(Reclamation, id_reclamation=id_reclamation)

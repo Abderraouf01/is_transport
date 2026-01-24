@@ -79,3 +79,37 @@ class PaiementForm(forms.ModelForm):
         if facture and montant > facture.reste_payer():
             raise forms.ValidationError("Le montant du paiement est supérieur au reste à payer de la facture.")
         return montant
+    
+from django import forms
+from .models import Reclamation
+
+
+class ReclamationForm(forms.ModelForm):
+    class Meta:
+        model = Reclamation
+        fields = [
+            'id_reclamation',
+            'nature_reclamation',
+            'client',
+            'expedition',
+            'facture',
+            'type_service',
+        ]
+
+        labels = {
+            'id_reclamation': 'ID Réclamation',
+            'nature_reclamation': 'Nature de la réclamation',
+            'client': 'Client',
+            'expedition': 'Expédition (optionnel)',
+            'facture': 'Facture (optionnel)',
+            'type_service': 'Type de service (optionnel)',
+        }
+
+        widgets = {
+            'id_reclamation': forms.TextInput(attrs={'class': 'form-control'}),
+            'nature_reclamation': forms.TextInput(attrs={'class': 'form-control'}),
+            'client': forms.Select(attrs={'class': 'form-control'}),
+            'expedition': forms.Select(attrs={'class': 'form-control'}),
+            'facture': forms.Select(attrs={'class': 'form-control'}),
+            'type_service': forms.Select(attrs={'class': 'form-control'}),
+        }

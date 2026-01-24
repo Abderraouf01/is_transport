@@ -1,0 +1,33 @@
+{% extends 'core/base.html' %}
+{% block title %}Réclamation {{ reclamation.id_reclamation }}{% endblock %}
+
+{% block content %}
+<h1>Réclamation {{ reclamation.id_reclamation }}</h1>
+
+<ul>
+    <li>Client : {{ reclamation.client }}</li>
+    <li>Nature : {{ reclamation.nature_reclamation }}</li>
+    <li>Date : {{ reclamation.date_reclamation }}</li>
+    <li>État : {{ reclamation.get_etat_reclamation_display }}</li>
+    <li>Agent : {{ reclamation.agent_responsable }}</li>
+</ul>
+
+<form method="post" action="{% url 'changer_etat_reclamation' reclamation.id_reclamation %}">
+    {% csrf_token %}
+    <select name="etat">
+        {% for e in reclamation.ETAT_CHOICES %}
+        <option value="{{ e.0 }}">{{ e.1 }}</option>
+        {% endfor %}
+    </select>
+    <button class="btn btn-edit">Changer état</button>
+</form>
+
+<hr>
+
+<a href="{% url 'update_reclamation' reclamation.id_reclamation %}" class="btn btn-edit">Modifier</a>
+
+<form method="post" action="{% url 'delete_reclamation' reclamation.id_reclamation %}" style="display:inline;">
+    {% csrf_token %}
+    <button class="btn btn-delete">Supprimer</button>
+</form>
+{% endblock %}

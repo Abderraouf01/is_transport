@@ -16,6 +16,7 @@ from .models import Client, Expedition, Tarification, Colis, Facture, Reclamatio
 from django.shortcuts import get_object_or_404,redirect
 from decimal import Decimal
 from .forms import PaiementForm
+from .forms import ReclamationForm
 
 
 
@@ -457,6 +458,7 @@ def incident_delete(request, id_incident):
         incident.delete()
         return redirect('incident_list')
     return render(request, 'core/incident_confirm_delete.html', {'incident': incident})
+    
 
 
 def home(request):
@@ -556,31 +558,46 @@ def delete_facture(request, id_facture):
 
 
 def create_reclamation(request):
-    if request.method=='POST':
-        client= get_object_or_404(Client, id_client=request.POST.get("client"))
+    if request.method == 'POST':
+        form = ReclamationForm(request.POST)
+        if form.is_valid():
+            reclamation = form.save(commit=False)
+            reclamation.agent_responsable = request.user
+            reclamation.save()
+            return redirect('journal_reclamations')
+    else:
+        form = ReclamationForm()
 
-        expedition=None
-        if request.POST.get("expedition"):
-            expedition=get_object_or_404(Expedition, tracking=request.POST.get("expedition"))
-        
-        facture=None
-        if request.POST.get("facture"):
-            facture=get_object_or_404(Facture, id_facture=request.POST.get("facture"))
+    return render(request, 'core/reclamation_form.html', {
+        'form': form
+    })
+    
+def update_reclamation(request, id_reclamation):
+    reclamation = get_object_or_404(Reclamation, id_reclamation=id_reclamation)
 
-        type_service= None
-        if request.POST.get("service"):
-            type_service= get_object_or_404(TypeDeService, code_service=request.POST.get("service"))
+    if request.method == 'POST':
+        form = ReclamationForm(request.POST, instance=reclamation)
+        if form.is_valid():
+            form.save()
+            return redirect('detail_reclamation', id_reclamation=reclamation.id_reclamation)
+    else:
+        form = ReclamationForm(instance=reclamation)
 
-        Reclamation.objects.create(
-            id_reclamation=request.POST['id_reclamation'],
-            nature_reclamation=request.POST['nature'],
-            client=client,
-            expedition=expedition,
-            facture=facture,
-            type_service=type_service,
-            agent_responsable=request.user
-        )
+    return render(request, 'core/reclamation_form.html', {
+        'form': form,
+        'reclamation': reclamation
+    })
+def delete_reclamation(request, id_reclamation):
+    reclamation = get_object_or_404(Reclamation, id_reclamation=id_reclamation)
+
+    if request.method == 'POST':
+        reclamation.delete()
         return redirect('journal_reclamations')
+
+    return render(request, 'core/reclamation_confirm_delete.html', {
+        'reclamation': reclamation
+    })
+
 
 def add_colis_to_reclamation(request, id_reclamation):
     reclamation = get_object_or_404(Reclamation, id_reclamation=id_reclamation)

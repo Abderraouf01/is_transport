@@ -62,6 +62,8 @@ urlpatterns = [
 
     path('reclamations/', journal_pdf_views.journal_reclamations, name='journal_reclamations'),
     path('reclamations/create/', views.create_reclamation, name='create_reclamation'),
+    path('reclamations/<str:id_reclamation>/update/', views.update_reclamation, name='update_reclamation'),
+    path('reclamations/<str:id_reclamation>/delete/', views.delete_reclamation, name='delete_reclamation'),
     path('reclamations/<str:id_reclamation>/', journal_pdf_views.detail_reclamation, name='detail_reclamation'),
     path('reclamations/<str:id_reclamation>/etat/',views.changer_etat_reclamation, name='changer_etat_reclamation'),
     path('reclamations/<str:id_reclamation>/colis/',views.add_colis_to_reclamation,name='add_colis_to_reclamation'),
