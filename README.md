@@ -14,6 +14,15 @@ The work was divided internally to ensure good modularity and clean architecture
 - Person B Yasmine:Section 4 
 - Person C Ines: Sections 3 and 5
 - Person D Sabrina: UI, templates, CRUD operations
+  
+## Section 1 -Tables (Sabrina's Contribution )
+This section is all about the main tables that make the system work. They store all the essential info for the Information System—customers, drivers, vehicles, destinations, services, and pricing.
+
+Everything is connected to the UI and HTML templates, so agents can manage data easily without touching the database directly, and do the Crud (create , read,update and delete on each table )
+
+## Implemented features 
+Each HTML template lets the agent to do the crud on the main tables plus mentioned in section 1 plus some other tabes like incidents and expeditions .
+
 
 ## Section 2 – Expedition (Abderraouf's Contribution)
 This section focuses on the core business rules related to expedition management:
