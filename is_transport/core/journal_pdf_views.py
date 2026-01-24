@@ -60,8 +60,7 @@ def journal_paiements(request):
         paiements=paiements.filter(date_paiement__gte=date_debut)
     elif date_fin:
         paiements=paiements.filter(date_paiement__lte=date_fin)
-
-
+        
     return render(request, 'core/journal_paiements.html', {
         'paiements': paiements,
         'clients': Client.objects.all(),
@@ -97,7 +96,7 @@ def journal_reclamations(request):
 def detail_reclamation(request, id_reclamation):
     reclamation= get_object_or_404(Reclamation, id_reclamation=id_reclamation)
 
-    return render(request, 'detail_reclamation.html',{'reclamation': reclamation})
+    return render(request, 'core/detail_reclamation.html',{'reclamation': reclamation})
 
     
 
@@ -162,7 +161,7 @@ def rapport_reclamations(request):
         'delai_moyen': delai_moyen,
         'motifs_recurrents': motifs_recurrents,
     }
-    return render(request, 'rapport_reclamations.html', context)
+    return render(request, 'core/rapport_reclamations.html', context)
 
 
 

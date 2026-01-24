@@ -357,11 +357,73 @@ def tarification_delete(request, pk):
 
 
 
-def incident_list(request):
-    incidents = Incident.objects.all()
-    return render(request, 'core/incident_list.html', {'incidents': incidents})
+def add_colis_to_reclamation(request, id_reclamation):
+    reclamation = get_object_or_404(Reclamation, id_reclamation=id_reclamation)
 
-def incident_create(request):
+    if request.method == 'POST':
+        listid_colis = request.POST.getlist('colis')
+
+        for id_colis in listid_colis:
+            colis = get_object_or_404(Colis, id_colis=id_colis)
+            ColisReclamation.objects.create(
+                reclamation=reclamation,
+                colis=colis
+            )
+
+    return redirect('detail_reclamation', id_reclamation=id_reclamation)
+
+
+
+
+from django.shortcuts import render ,redirect 
+from .models import Client, Expedition, Tarification, Colis ,Chauffeur,Vehicule,Destination,TypeDeService
+from .forms import ClientForm 
+from .forms import ChauffeurForm
+from .forms import VehiculeForm
+from .forms import DestinationForm
+from .forms import TypeDeServiceForm
+from .forms import TarificationForm
+from .forms import IncidentForm
+from .models import Incident
+from .forms import FactureForm
+
+from django.shortcuts import render
+from .models import Client, Expedition, Tarification, Colis, Facture, Reclamation, TypeDeService, Paiement, ColisReclamation
+from django.shortcuts import get_object_or_404,redirect
+from decimal import Decimal
+
+
+
+
+def create_expedition(request):
+    if request.method == "POST":
+        client = get_object_or_404(Client, id=request.POST.get("client"))
+        tarification = get_object_or_404(Tarification, id=request.POST.get("tarification"))
+
+        Expedition.objects.create(
+            client=client,
+            tarification=tarification
+        )
+
+
+
+def expedition_change_statut(request, tracking, new_statut):
+    expedition = get_object_or_404(Expedition, tracking=tracking)
+
+    try:
+        expedition.change_statut(new_statut)
+    except ValueError:
+    
+        pass
+
+    return redirect('expedition_detail', tracking=tracking)
+
+def add_colis(request, tracking):
+    expedition = get_object_or_404(Expedition, tracking=tracking)
+
+    if not expedition.can_add_colis():
+        return redirect('expedition_detail', tracking=tracking)
+
     if request.method == 'POST':
         form = IncidentForm(request.POST)
         if form.is_valid():
@@ -388,7 +450,6 @@ def home(request):
     return render(request, 'core/home.html', {
         'expeditions': expeditions
     })
-
 
 
 
