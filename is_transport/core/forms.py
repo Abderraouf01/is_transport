@@ -1,5 +1,5 @@
 from django import forms 
-from .models import Client ,Chauffeur , Vehicule , Destination ,TypeDeService,Tarification , Incident
+from .models import Client ,Chauffeur , Vehicule , Destination ,TypeDeService,Tarification , Incident, Expedition, Facture, Paiement
 
 class ClientForm (forms.ModelForm):
     class Meta :
@@ -51,3 +51,15 @@ class IncidentForm(forms.ModelForm):
             'date_incident': forms.DateInput(attrs={'type': 'date'}),
             'description_incident': forms.Textarea(attrs={'rows': 3}),
         }
+
+class FactureForm(forms.ModelForm):
+    expeditions = forms.ModelMultipleChoiceField(
+        queryset=Expedition.objects.all(),
+        widget=forms.CheckboxSelectMultiple,
+        required=False,
+        label="Expéditions associées"
+    )
+
+    class Meta:
+        model = Facture
+        fields = ['id_facture', 'client']

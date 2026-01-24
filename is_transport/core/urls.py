@@ -46,15 +46,12 @@ urlpatterns = [
     path('tarifications/add/', views.tarification_create, name='tarification_create'),
     path('tarifications/<int:pk>/edit/', views.tarification_update, name='tarification_update'),
     path('tarifications/<int:pk>/delete/', views.tarification_delete, name='tarification_delete'),
-
-    path('factures/create/', views.create_facture, name='create_facture'),
-
-    path('factures/<str:id_facture>/delete/', views.delete_facture, name='delete_facture'),
-
+    
     path('factures/', journal_pdf_views.journal_factures, name='journal_factures'),
-    
+    path('factures/create/', views.create_facture, name='create_facture'),
+    path('factures/<str:id_facture>/update/', views.update_facture, name='update_facture'),
+    path('factures/<str:id_facture>/delete/', views.delete_facture, name='delete_facture'),
     path('factures/<str:id_facture>/', journal_pdf_views.detail_facture, name='detail_facture'),
-    
     path('factures/<str:id_facture>/pdf/', journal_pdf_views.facture_pdf, name='facture_pdf'),
     
     path('paiements/create/', views.create_paiement, name='create_paiement'),

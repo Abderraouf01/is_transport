@@ -1,0 +1,101 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Journal des factures{% endblock %}
+
+{% block content %}
+<h1>Journal des factures</h1>
+
+<div style="display: flex; gap: 10px; margin-bottom: 15px;">
+    <a href="{% url 'create_facture' %}" class="btn btn-add">
+        Ajouter une facture
+    </a>
+
+    <button type="button" class="btn btn-filter" onclick="toggleFilters()">
+        Filtrer
+    </button>
+</div>
+
+<!-- FILTRES  -->
+<form method="get" id="filtersBox" style="display: none; margin-bottom: 15px;">
+    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+
+        <select name="client" style="padding: 4px;">
+        <option value="" disabled {% if not request.GET.client %}selected{% endif %}>-- Choisir un client --</option>
+            {% for c in clients %}
+                <option value="{{ c.id_client }}"
+                    {% if request.GET.client == c.id_client|stringformat:"s" %}selected{% endif %}>
+                    {{ c }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <select name="statut" style="padding: 4px;">
+        <option value="" disabled {% if not request.GET.statut %}selected{% endif %}>-- Choisir un statut --</option>
+
+            {% for code, label in statuts %}
+                <option value="{{ code }}"
+                    {% if request.GET.statut == code %}selected{% endif %}>
+                    {{ label }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <input type="date" name="date_debut"
+               value="{{ request.GET.date_debut }}"
+               style="padding: 4px;">
+
+        <input type="date" name="date_fin"
+               value="{{ request.GET.date_fin }}"
+               style="padding: 4px;">
+
+        <button type="submit" class="btn btn-edit">
+            Appliquer
+        </button>
+
+        <a href="{% url 'journal_factures' %}" class="btn btn-cancel">
+            Réinitialiser
+        </a>
+    </div>
+</form>
+
+<table>
+    <thead>
+        <tr>
+            <th>ID Facture</th>
+            <th>Date</th>
+            <th>Client</th>
+            <th>Montant</th>
+            <th>Statut</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for facture in factures %}
+        <tr>
+            <td>{{ facture.id_facture }}</td>
+            <td>{{ facture.date_facture }}</td>
+            <td>{{ facture.client }}</td>
+            <td>{{ facture.montant_total }} DA</td>
+            <td>{{ facture.get_statut_facture_display}}</td>
+            <td>
+                <a href="{% url 'detail_facture' facture.id_facture %}" class="btn btn-edit">
+                    Détail
+                </a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="6">Aucune facture trouvée.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<script>
+function toggleFilters() {
+    const box = document.getElementById('filtersBox');
+    box.style.display = box.style.display === 'none' ? 'block' : 'none';
+}
+</script>
+
+{% endblock %}

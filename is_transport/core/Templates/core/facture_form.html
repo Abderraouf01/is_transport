@@ -1,0 +1,28 @@
+{% extends 'core/base.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<h1>{{ title }}</h1>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+
+    <button type="submit" class="btn btn-add">
+        Sauvegarder
+    </button>
+
+    {% if facture %}
+        <a href="{% url 'delete_facture' facture.id_facture %}"
+           class="btn btn-delete"
+           onclick="return confirm('Supprimer cette facture ?');">
+            Supprimer
+        </a>
+    {% endif %}
+
+    <a href="{% url 'journal_factures' %}" class="btn btn-edit">
+        Annuler
+    </a>
+</form>
+{% endblock %}

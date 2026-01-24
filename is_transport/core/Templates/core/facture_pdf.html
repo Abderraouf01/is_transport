@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Facture {{ facture.id_facture }}</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            font-size: 12px;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 20px;
+        }
+        
+        .company {
+            font-weight: bold;
+            font-size: 18px;
+            color: #007bff;
+            margin-bottom: 10px;
+        }
+        
+        .invoice-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        
+        .invoice-number {
+            font-size: 14px;
+            font-weight: bold;
+            color: #007bff;
+        }
+        
+        .section {
+            margin-bottom: 20px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        th {
+            background-color: #007bff;
+            color: white;
+            padding: 10px;
+            text-align: left;
+            font-weight: bold;
+        }
+        
+        td {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        
+        .total-row {
+            font-weight: bold;
+            background-color: #e9ecef !important;
+        }
+        
+        .amount {
+            text-align: right;
+        }
+        
+        .totals {
+            width: 40%;
+            margin-left: auto;
+            margin-top: 20px;
+        }
+        
+        .totals table {
+            border: 2px solid #007bff;
+        }
+        
+        .totals td {
+            padding: 8px;
+        }
+        
+        .footer {
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            text-align: center;
+            font-size: 10px;
+            color: #666;
+        }
+        
+        .client-box {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 11px;
+        }
+        
+
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div>
+            <div class="company">TRANSPORT EXPRESS ALGÉRIE</div>
+            <div> 123 Rue Didouche Mourad</div>
+            <div>16000 Alger Centre, Algérie</div>
+            <div>Tél: +213 (0) 23 45 67 89</div>
+            <div>Email: contact@transpoexpress.dz</div>
+        </div>
+        
+        <div>
+            <div class="invoice-title">FACTURE</div>
+            <div class="invoice-number">N°: {{ facture.id_facture }}</div>
+            <div>Date: {{ facture.date_facture|date:"d/m/Y" }}</div>
+            <div>
+                Statut: 
+                <span class="status-badge status-{{ facture.statut_facture }}">
+                    {{ facture.get_statut_facture_display|upper }}
+                </span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="section">
+        <div class="client-box">
+            <strong>CLIENT :</strong><br>
+            {{ facture.client.nom }} {{ facture.client.prenom }}<br>
+            ID client: {{ facture.client.id_client }}<br>
+             {{ facture.client.email }}<br>
+             {{ facture.client.telephone }}<br>
+             {{ facture.client.adresse|linebreaks }}
+        </div>
+    </div>
+    
+    <div class="section">
+        <h3>DÉTAIL DES EXPÉDITIONS</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Tracking</th>
+                    <th>Description</th>
+                    <th>Service</th>
+                    <th>Destination</th>
+                    <th>Date</th>
+                    <th>Montant HT</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for exp in expeditions %}
+                <tr>
+                    <td>{{ exp.tracking }}</td>
+                    <td>{{ exp.description_exp|default:"Livraison de colis" }}</td>
+                    <td>{{ exp.tarification.type_service.nom_service }}</td>
+                    <td>{{ exp.tarification.destination.ville_dest }}, {{ exp.tarification.destination.pays_dest }}</td>
+                    <td>{{ exp.date_creation_exp|date:"d/m/Y" }}</td>
+                    <td class="amount">{{ exp.montant_expedition|floatformat:2 }} DA</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" style="text-align: center;">Aucune expédition trouvée</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <div class="totals">
+        <table>
+            <tr>
+                <td>Total HT:</td>
+                <td class="amount">{{ facture.montant_HT|floatformat:2 }} DA</td>
+            </tr>
+            <tr>
+                <td>TVA (19%):</td>
+                <td class="amount">{{ facture.montant_TVA|floatformat:2 }} DA</td>
+            </tr>
+            <tr class="total-row">
+                <td><strong>Total TTC:</strong></td>
+                <td class="amount"><strong>{{ facture.montant_TTC|floatformat:2 }} DA</strong></td>
+            </tr>
+            {% if facture.total_paye > 0 %}
+            <tr>
+                <td>Total Payé:</td>
+                <td class="amount">{{ facture.total_paye|floatformat:2 }} DA</td>
+            </tr>
+            <tr class="total-row">
+                <td><strong>Reste à Payer:</strong></td>
+                <td class="amount"><strong>{{ facture.reste_payer|floatformat:2 }} DA</strong></td>
+            </tr>
+            {% endif %}
+        </table>
+    </div>
+
+    
+    <div class="footer">
+        <div><strong>TRANSPORT EXPRESS ALGÉRIE</strong> - Société de Transport et Livraison</div>
+        <div> 123 Rue Didouche Mourad, 16000 Alger Centre, Algérie</div>
+        <div>📞 +213 (0) 23 45 67 89 - 📧 contact@transpoexpress.dz</div>
+
+    </div>
+</body>
+</html>
