@@ -62,6 +62,7 @@
         color: #666;
         font-size: 0.9rem;
     }
+    
 
 
     .card-clients { border-left: 4px solid #3498db; }
@@ -90,6 +91,7 @@
     .card-incidents { border-left: 4px solid #e67e22; }
     .card-incidents:hover { border-color: #e67e22; }
     .card-incidents .menu-card-icon { color: #e67e22; }
+    
     .card-expeditions { border-left: 4px solid #16a085; }
     .card-expeditions:hover { border-color: #16a085; }
     .card-expeditions .menu-card-icon { color: #16a085; }
@@ -143,6 +145,7 @@
     <p>Voir et gérer les incidents</p>
     
 
+
 </a>
 <a href="{% url 'expedition_list' %}" class="menu-card card-expeditions">
     <div class="menu-card-icon">🚚</div>
@@ -155,6 +158,13 @@
     <h3>Factures</h3>
     <p>Voir et gérer les factures</p>
 </a>
+
+<a href="{% url 'journal_paiements' %}" class="menu-card card-paiements">
+    <div class="menu-card-icon">💳</div>
+    <h3>Paiements</h3>
+    <p>Voir et gérer les paiements</p>
+</a>
+
 
 </div>
 

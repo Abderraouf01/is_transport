@@ -60,15 +60,18 @@ def journal_paiements(request):
         paiements=paiements.filter(date_paiement__gte=date_debut)
     elif date_fin:
         paiements=paiements.filter(date_paiement__lte=date_fin)
-
-    return render(request, 'journal_paiements.html', {'paiements':paiements })
-
+        
+    return render(request, 'core/journal_paiements.html', {
+        'paiements': paiements,
+        'clients': Client.objects.all(),
+        'modes': Paiement.MODE_PAIEMENT_CHOICES,
+    })
 
 def detail_paiement(request, id_paiement):
     paiement=get_object_or_404(Paiement, id_paiement=id_paiement)
     context={'paiement': paiement}
 
-    return render(request, 'detail_paiement.html',context)
+    return render(request, 'core/detail_paiement.html',context)
 
 def journal_reclamations(request):
     reclamations=Reclamation.objects.all()
@@ -88,12 +91,14 @@ def journal_reclamations(request):
         reclamations = reclamations.filter(date_reclamation__gte=date_debut)
     elif date_fin:
         reclamations = reclamations.filter(date_reclamation__lte=date_fin)
-    return render(request, 'journal_reclamations.html', {'reclamations': reclamations})
+    return render(request, 'core/journal_reclamations.html', {'reclamations': reclamations,
+                                                              'etats': Reclamation.ETAT_CHOICES,
+                                                              'clients': Client.objects.all()})
 
 def detail_reclamation(request, id_reclamation):
     reclamation= get_object_or_404(Reclamation, id_reclamation=id_reclamation)
 
-    return render(request, 'detail_reclamation.html',{'reclamation': reclamation})
+    return render(request, 'core/detail_reclamation.html',{'reclamation': reclamation})
 
     
 
@@ -127,7 +132,7 @@ def paiement_pdf(request, id_paiement):
     paiement = get_object_or_404(Paiement, id_paiement=id_paiement)
     context = {'paiement': paiement}
 
-    html_string = render(request, 'detail_paiement.html', context).content.decode('utf-8')
+    html_string = render_to_string('core/paiement_pdf.html', context)
 
     # création du PDF
     pdf_file = HTML(string=html_string).write_pdf()
@@ -158,7 +163,7 @@ def rapport_reclamations(request):
         'delai_moyen': delai_moyen,
         'motifs_recurrents': motifs_recurrents,
     }
-    return render(request, 'rapport_reclamations.html', context)
+    return render(request, 'core/rapport_reclamations.html', context)
 
 
 

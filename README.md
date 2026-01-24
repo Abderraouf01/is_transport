@@ -14,6 +14,15 @@ The work was divided internally to ensure good modularity and clean architecture
 - Person B Yasmine:Section 4 
 - Person C Ines: Sections 3 and 5
 - Person D Sabrina: UI, templates, CRUD operations
+  
+## Section 1 -Tables (Sabrina's Contribution )
+This section is all about the main tables that make the system work. They store all the essential info for the Information System—customers, drivers, vehicles, destinations, services, and pricing.
+
+Everything is connected to the UI and HTML templates, so agents can manage data easily without touching the database directly, and do the Crud (create , read,update and delete ) on each table 
+
+## Implemented features 
+Each HTML template lets the agent to do the crud on the main tables mentioned in section 1 plus some other tabes like incidents and expeditions .
+
 
 ## Section 2 – Expedition (Abderraouf's Contribution)
 This section focuses on the core business rules related to expedition management:
@@ -73,4 +82,29 @@ The `Reclamation` model contains a method to manage and update the status of a r
 ## Notes
 - UI templates and routing to actions are handled in other sections of the project.
 - PDF generation relies on WeasyPrint and HTML templates
+
+## Section 4 – Gestion des Incidents (yasmine's Contribution)
+
+This section focuses on the management of incidents occurring during expeditions or deliveries. It ensures proper tracking, reporting, and updating of incidents to maintain operational efficiency.
+
+### Implemented Features
+- Recording different types of incidents (delays, lost parcels, damaged goods, technical issues, etc.)
+- Linking incidents to specific expeditions, tournées, or parcels
+- Adding comments and uploading documents or photos for detailed reporting
+- Automatic update of the expedition status based on the incident
+- Generation of incident alerts for management or clients
+- Journal view displaying all incidents with filtering options (date, type, expedition, tournées)
+- Detailed view for each incident for tracking and analysis
+
+### Business Logic
+- The `Incident` model contains methods to validate incident type, update the related expedition/tournée status, and maintain a history of changes
+- Business rules are implemented at the model level to ensure data consistency
+- Invalid status updates are rejected automatically
+- Views are kept thin: responsible only for creating, displaying, and updating incidents, as well as triggering notifications
+
+### Design Principles
+- Maintain modular and clean architecture
+- Ensure all business rules are enforced in the models, not in the UI
+- Provide an intuitive interface for agents to quickly log and manage incidents
+- Support reporting and analysis for improving operational efficiency
 

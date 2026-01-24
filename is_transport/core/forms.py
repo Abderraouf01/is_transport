@@ -63,3 +63,53 @@ class FactureForm(forms.ModelForm):
     class Meta:
         model = Facture
         fields = ['id_facture', 'client']
+
+class PaiementForm(forms.ModelForm):
+    class Meta:
+        model = Paiement
+        fields = ['id_paiement', 'client', 'facture', 'date_paiement', 'montant_paiement', 'mode_paiement']
+        widgets = {
+            'date_paiement': forms.DateInput(attrs={'type': 'date'}),
+            'mode_paiement': forms.Select(),
+        }
+
+    def clean_montant_paiement(self):
+        montant = self.cleaned_data['montant_paiement']
+        facture = self.cleaned_data.get('facture')
+        if facture and montant > facture.reste_payer():
+            raise forms.ValidationError("Le montant du paiement est supérieur au reste à payer de la facture.")
+        return montant
+    
+from django import forms
+from .models import Reclamation
+
+
+class ReclamationForm(forms.ModelForm):
+    class Meta:
+        model = Reclamation
+        fields = [
+            'id_reclamation',
+            'nature_reclamation',
+            'client',
+            'expedition',
+            'facture',
+            'type_service',
+        ]
+
+        labels = {
+            'id_reclamation': 'ID Réclamation',
+            'nature_reclamation': 'Nature de la réclamation',
+            'client': 'Client',
+            'expedition': 'Expédition (optionnel)',
+            'facture': 'Facture (optionnel)',
+            'type_service': 'Type de service (optionnel)',
+        }
+
+        widgets = {
+            'id_reclamation': forms.TextInput(attrs={'class': 'form-control'}),
+            'nature_reclamation': forms.TextInput(attrs={'class': 'form-control'}),
+            'client': forms.Select(attrs={'class': 'form-control'}),
+            'expedition': forms.Select(attrs={'class': 'form-control'}),
+            'facture': forms.Select(attrs={'class': 'form-control'}),
+            'type_service': forms.Select(attrs={'class': 'form-control'}),
+        }
