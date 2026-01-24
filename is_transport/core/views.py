@@ -859,3 +859,8 @@ def incident_delete(request, id_incident):
         return redirect('incident_list')
     return render(request, 'core/incident_confirm_delete.html', {'incident': incident})
 
+def home(request):
+    expeditions = Expedition.objects.all()  # or .order_by('-id')
+    return render(request, 'core/home.html', {
+        'expeditions': expeditions
+    })
