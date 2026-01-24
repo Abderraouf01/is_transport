@@ -1,0 +1,80 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Journal des expéditions{% endblock %}
+
+{% block content %}
+<h1>Journal des expéditions</h1>
+
+<div style="text-align:right; margin-bottom:15px;">
+    <a href="{% url 'create_expedition' %}" class="btn btn-add">
+        + Créer une expédition
+    </a>
+</div>
+
+
+<!-- FILTER FORM -->
+<form method="get" style="display:flex; gap:10px; margin-bottom:15px;">
+    <select name="statut">
+        <option value="">Statut</option>
+        <option value="cree">Créée</option>
+        <option value="transit">Transit</option>
+        <option value="livree">Livrée</option>
+    </select>
+
+    <select name="client">
+        <option value="">Client</option>
+        {% for c in clients %}
+            <option value="{{ c.id }}">{{ c.nom }}</option>
+        {% endfor %}
+    </select>
+
+    <button class="btn btn-edit">Filtrer</button>
+</form>
+
+<table>
+    <thead>
+        <tr>
+            <th>Tracking</th>
+            <th>Client</th>
+            <th>Statut</th>
+            <th>Montant</th>
+            <th>Date création</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for expedition in expeditions %}
+        <tr>
+            <td>{{ expedition.tracking }}</td>
+            <td>{{ expedition.client.nom }} {{ expedition.client.prenom }}</td>
+            <td>{{ expedition.get_statut_expedition_display }}</td>
+            <td>{{ expedition.montant_expedition }} DA</td>
+            <td>{{ expedition.date_creation_exp|date:"Y-m-d H:i" }}</td>
+            <td>
+                <a href="{% url 'expedition_detail' expedition.tracking %}" class="btn btn-edit">
+                    Détails
+                </a>
+
+                <a href="{% url 'expedition_suivi' expedition.tracking %}" class="btn btn-edit">
+                    Suivi
+                </a>
+
+                {% if not expedition.tournee %}
+                    <span style="color:green; font-size:12px;">
+                        Non affectée
+                    </span>
+                {% else %}
+                    <span style="color:gray; font-size:12px;">
+                        Liée à une tournée
+                    </span>
+                {% endif %}
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="6">Aucune expédition trouvée.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

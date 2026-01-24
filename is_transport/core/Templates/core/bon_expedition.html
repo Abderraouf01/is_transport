@@ -1,0 +1,9 @@
+<h1>Bon d’expédition</h1>
+
+<p><strong>Tracking:</strong> {{ expedition.tracking }}</p>
+<p><strong>Client:</strong> {{ expedition.client }}</p>
+<p><strong>Destination:</strong> {{ expedition.destination }}</p>
+<p><strong>Service:</strong> {{ expedition.type_service }}</p>
+<p><strong>Statut:</strong> {{ expedition.get_statut_expedition_display }}</p>
+
+<button onclick="window.print()">Imprimer</button>

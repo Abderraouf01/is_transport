@@ -1,0 +1,28 @@
+{% extends 'core/base.html' %}
+{% block title %}Créer une expédition{% endblock %}
+
+{% block content %}
+<h1>Créer une expédition</h1>
+
+<form method="post">
+    {% csrf_token %}
+
+    <label>Client</label>
+    <select name="client" required>
+        {% for c in clients %}
+            <option value="{{ c.id }}">{{ c.nom }} {{ c.prenom }}</option>
+        {% endfor %}
+    </select>
+
+    <label>Tarification</label>
+    <select name="tarification" required>
+        {% for t in tarifications %}
+            <option value="{{ t.id }}">
+                {{ t.type_service.nom_service }} - {{ t.destination.ville_dest }}
+            </option>
+        {% endfor %}
+    </select>
+
+    <button class="btn btn-add">Créer</button>
+</form>
+{% endblock %}

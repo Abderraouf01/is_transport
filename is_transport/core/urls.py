@@ -4,13 +4,17 @@ from . import views
 from . import journal_pdf_views
 
 urlpatterns = [
+    path('expedition/<str:tracking>/bon/', views.bon_expedition, name='bon_expedition'),
+    path('expeditions/', views.expedition_list, name='expedition_list'),
+    path('expedition/<str:tracking>/', views.expedition_detail, name='expedition_detail'),
+    path('expedition/<str:tracking>/suivi/', views.expedition_suivi, name='expedition_suivi'),
+    path('expeditions/create/', views.create_expedition, name='create_expedition'),
+
     path(
         'expedition/<str:tracking>/statut/<str:new_statut>/',
         views.expedition_change_statut,
         name='expedition_change_statut'
     ),
-
-
     path('',views.home , name='home'),
 
     path('clients/', views.client_list ,name='client_list' ),
@@ -78,4 +82,5 @@ urlpatterns = [
     path('incidents/<str:id_incident>/', views.incident_detail, name='incident_detail'),
     path('incidents/<str:id_incident>/delete/', views.incident_delete, name='incident_delete'),
 
+   
 ]

@@ -1,0 +1,56 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Détail Expédition{% endblock %}
+
+{% block content %}
+<h1>Détail de l'expédition</h1>
+
+<p><strong>Tracking :</strong> {{ expedition.tracking }}</p>
+<p><strong>Client :</strong> {{ expedition.client }}</p>
+<p><strong>Statut :</strong> {{ expedition.get_statut_expedition_display }}</p>
+<p><strong>Montant :</strong> {{ expedition.montant_expedition }} DA</p>
+
+<h2>Colis</h2>
+<table>
+    <tr>
+        <th>ID</th>
+        <th>Poids</th>
+        <th>Volume</th>
+        <th>Description</th>
+    </tr>
+    {% for colis in expedition.colis.all %}
+    <tr>
+        <td>{{ colis.id_colis }}</td>
+        <td>{{ colis.poids_colis }}</td>
+        <td>{{ colis.volume_colis }}</td>
+        <td>{{ colis.description_colis }}</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="4">Aucun colis</td></tr>
+    {% endfor %}
+</table>
+
+{% if expedition.can_add_colis %}
+<a class="btn btn-add" href="{% url 'add_colis' expedition.tracking %}">Ajouter colis</a>
+{% endif %}
+
+<h2>Changer statut</h2>
+{% for code,label in expedition.STATUT_CHOICES %}
+    {% if expedition.can_change_statut code %}
+        <a class="btn btn-edit"
+           href="{% url 'expedition_change_statut' expedition.tracking code %}">
+           {{ label }}
+        </a>
+    {% endif %}
+{% endfor %}
+
+<br><br>
+<a href="{% url 'expedition_suivi' expedition.tracking %}" class="btn btn-add">
+Voir suivi
+</a>
+<a href="{% url 'bon_expedition' expedition.tracking %}" class="btn btn-add">
+    Bon d'expédition
+</a>
+
+
+{% endblock %}

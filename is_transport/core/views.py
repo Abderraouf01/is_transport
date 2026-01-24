@@ -1,6 +1,7 @@
 
+from pyexpat.errors import messages
 from django.shortcuts import render ,redirect 
-from .models import Client, Expedition, Tarification, Colis ,Chauffeur,Vehicule,Destination,TypeDeService
+from .models import Client, Expedition, Tarification, Colis ,Chauffeur,Vehicule,Destination,TypeDeService,SuiviExpedition,Facture,Reclamation,Paiement,ColisReclamation
 from django.shortcuts import get_object_or_404,redirect
 from .forms import ClientForm 
 from .forms import ChauffeurForm
@@ -10,7 +11,6 @@ from .forms import TypeDeServiceForm
 from .forms import TarificationForm
 from .forms import IncidentForm
 from .models import Incident
-
 from django.shortcuts import render
 from .models import Client, Expedition, Tarification, Colis, Facture, Reclamation, TypeDeService, Paiement, ColisReclamation
 from django.shortcuts import get_object_or_404,redirect
@@ -24,10 +24,31 @@ def create_expedition(request):
         client = get_object_or_404(Client, id=request.POST.get("client"))
         tarification = get_object_or_404(Tarification, id=request.POST.get("tarification"))
 
-        Expedition.objects.create(
+        expedition = Expedition.objects.create(
             client=client,
             tarification=tarification
         )
+
+        return redirect('expedition_detail', tracking=expedition.tracking)
+
+    return render(request, 'core/expedition_create.html', {
+        'clients': Client.objects.all(),
+        'tarifications': Tarification.objects.all(),
+    })
+
+
+
+def expedition_delete(request, tracking):
+    expedition = get_object_or_404(Expedition, tracking=tracking)
+
+    if not expedition.can_be_deleted():
+        messages.error(request, "Impossible de supprimer cette expédition")
+        return redirect('expedition_list')
+
+    expedition.delete()
+    messages.success(request, "Expédition supprimée")
+    return redirect('expedition_list')
+
 
 
 
@@ -36,11 +57,69 @@ def expedition_change_statut(request, tracking, new_statut):
 
     try:
         expedition.change_statut(new_statut)
+
+        SuiviExpedition.objects.create(
+            suivi_expedition=expedition,
+            statut=new_statut,
+            lieu_passage="Mise à jour manuelle",
+            commentaire=f"Changement de statut vers {new_statut}"
+        )
+
     except ValueError:
-    
         pass
 
     return redirect('expedition_detail', tracking=tracking)
+
+
+
+def expedition_list(request):
+    expeditions = Expedition.objects.all()
+    clients = Client.objects.all()
+
+    statut = request.GET.get('statut')
+    client_id = request.GET.get('client')
+
+    if statut:
+        expeditions = expeditions.filter(statut_expedition=statut)
+
+    if client_id:
+        expeditions = expeditions.filter(client_id=client_id)
+
+    return render(request, 'core/expedition_list.html', {
+        'expeditions': expeditions,
+        'clients': clients,
+    })
+
+
+
+
+def expedition_detail(request, tracking):
+    expedition = get_object_or_404(Expedition, tracking=tracking)
+    colis = expedition.colis.all()
+
+    return render(request, 'core/expedition_detail.html', {
+        'expedition': expedition,
+        'colis': colis
+    })
+
+
+def expedition_suivi(request, tracking):
+    expedition = get_object_or_404(Expedition, tracking=tracking)
+    suivis = expedition.suivi.all().order_by('-date_passage')
+
+    return render(request, 'core/expedition_suivi.html', {
+        'expedition': expedition,
+        'suivis': suivis
+    })
+
+def bon_expedition(request, tracking):
+    expedition = get_object_or_404(Expedition, tracking=tracking)
+    return render(request, 'core/bon_expedition.html', {
+        'expedition': expedition
+    })
+
+
+
 
 def add_colis(request, tracking):
     expedition = get_object_or_404(Expedition, tracking=tracking)
