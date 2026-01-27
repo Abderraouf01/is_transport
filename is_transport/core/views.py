@@ -650,11 +650,14 @@ def delete_reclamation(request, id_reclamation):
 def add_colis_to_reclamation(request, id_reclamation):
     reclamation = get_object_or_404(Reclamation, id_reclamation=id_reclamation)
 
+    if reclamation.expedition is None:
+        return redirect('detail_reclamation', id_reclamation=id_reclamation)
+    
     if request.method == 'POST':
         listid_colis = request.POST.getlist('colis')
 
         for id_colis in listid_colis:
-            colis = get_object_or_404(Colis, id_colis=id_colis)
+            colis = get_object_or_404(Colis, id_colis=id_colis,expedition=reclamation.expedition)
             ColisReclamation.objects.create(
                 reclamation=reclamation,
                 colis=colis

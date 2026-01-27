@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404
-from .models import Facture, Paiement, Reclamation,Client
+from .models import Facture, Paiement, Reclamation,Client,Colis
 from django.http import HttpResponse
 from weasyprint import HTML
 from django.db.models import Count, Avg, F, ExpressionWrapper, DurationField
@@ -91,14 +91,48 @@ def journal_reclamations(request):
         reclamations = reclamations.filter(date_reclamation__gte=date_debut)
     elif date_fin:
         reclamations = reclamations.filter(date_reclamation__lte=date_fin)
-    return render(request, 'core/journal_reclamations.html', {'reclamations': reclamations,
-                                                              'etats': Reclamation.ETAT_CHOICES,
-                                                              'clients': Client.objects.all()})
+    
+    stats_par_etat = (
+        Reclamation.objects.values('etat_reclamation').annotate(total=Count('id'))
+    )
+
+    ETAT_LABELS = dict(Reclamation.ETAT_CHOICES)
+    for s in stats_par_etat:
+        s['etat_reclamation'] = ETAT_LABELS.get(s['etat_reclamation'], s['etat_reclamation'])
+    reclamations_resolues=Reclamation.objects.filter(
+        etat_reclamation='resolue',
+        date_resolution__isnull=False
+    )
+    delai_moyen = reclamations_resolues.annotate(
+        delai=ExpressionWrapper(F('date_resolution') - F('date_reclamation'), output_field=DurationField())
+    ).aggregate(moyenne=Avg('delai'))['moyenne']
+
+    motifs_recurrents = Reclamation.objects.values('nature_reclamation') \
+        .annotate(total=Count('id')).order_by('-total')
+
+    context={'reclamations': reclamations,
+        'etats': Reclamation.ETAT_CHOICES,
+        'clients': Client.objects.all(),
+        'stats_par_etat': stats_par_etat,
+        'delai_moyen': delai_moyen,
+        'motifs_recurrents': motifs_recurrents,
+    }
+    return render(request, 'core/journal_reclamations.html', context)
 
 def detail_reclamation(request, id_reclamation):
     reclamation= get_object_or_404(Reclamation, id_reclamation=id_reclamation)
+    colis_disponibles = []
+    if reclamation.expedition:
+        colis_disponibles = Colis.objects.filter(
+            expedition=reclamation.expedition
+        )
 
-    return render(request, 'core/detail_reclamation.html',{'reclamation': reclamation})
+    context = {
+        'reclamation': reclamation,
+        'colis_disponibles': colis_disponibles,
+    }
+
+    return render(request, 'core/detail_reclamation.html',context)
 
     
 
@@ -141,29 +175,5 @@ def paiement_pdf(request, id_paiement):
     response = HttpResponse(pdf_file, content_type='application/pdf')
     response['Content-Disposition'] = f'filename="paiement_{paiement.id_paiement}.pdf"'
     return response
-
-def rapport_reclamations(request):
-    stats_par_etat = (
-        Reclamation.objects.values('etat_reclamation').annotate(total=Count('id'))
-    )
-
-    reclamations_resolues=Reclamation.objects.filter(
-        etat_reclamation='resolue',
-        date_resolution__isnull=False
-    )
-    delai_moyen = reclamations_resolues.annotate(
-        delai=ExpressionWrapper(F('date_resolution') - F('date_reclamation'), output_field=DurationField())
-    ).aggregate(moyenne=Avg('delai'))['moyenne']
-
-    motifs_recurrents = Reclamation.objects.values('nature_reclamation') \
-        .annotate(total=Count('id')).order_by('-total')
-
-    context={
-        'stats_par_etat': stats_par_etat,
-        'delai_moyen': delai_moyen,
-        'motifs_recurrents': motifs_recurrents,
-    }
-    return render(request, 'core/rapport_reclamations.html', context)
-
 
 

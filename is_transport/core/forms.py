@@ -1,5 +1,5 @@
 from django import forms 
-from .models import Client ,Chauffeur , Vehicule , Destination ,TypeDeService,Tarification , Incident, Expedition, Facture, Paiement
+from .models import Client ,Chauffeur , Vehicule , Destination ,TypeDeService,Tarification , Incident, Expedition, Facture, Paiement, Reclamation
 
 class ClientForm (forms.ModelForm):
     class Meta :
@@ -79,9 +79,7 @@ class PaiementForm(forms.ModelForm):
         if facture and montant > facture.reste_payer():
             raise forms.ValidationError("Le montant du paiement est supérieur au reste à payer de la facture.")
         return montant
-    
-from django import forms
-from .models import Reclamation
+
 
 
 class ReclamationForm(forms.ModelForm):
@@ -94,6 +92,7 @@ class ReclamationForm(forms.ModelForm):
             'expedition',
             'facture',
             'type_service',
+            
         ]
 
         labels = {

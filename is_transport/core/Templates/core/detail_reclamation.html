@@ -9,8 +9,13 @@
     <li>Nature : {{ reclamation.nature_reclamation }}</li>
     <li>Date : {{ reclamation.date_reclamation }}</li>
     <li>État : {{ reclamation.get_etat_reclamation_display }}</li>
-    <li>Agent : {{ reclamation.agent_responsable }}</li>
+     {% if reclamation.expedition %}
+    <li>Expédition : {{ reclamation.expedition.tracking }}</li>
+    {% endif %}
 </ul>
+
+<hr>
+
 
 <form method="post" action="{% url 'changer_etat_reclamation' reclamation.id_reclamation %}">
     {% csrf_token %}
@@ -28,6 +33,8 @@
 
 <form method="post" action="{% url 'delete_reclamation' reclamation.id_reclamation %}" style="display:inline;">
     {% csrf_token %}
-    <button class="btn btn-delete">Supprimer</button>
+    <button type="submit" class="btn btn-delete" onclick="return confirm('Supprimer cette reclamation ?'); ">Supprimer</button>
+    <a href="{% url 'journal_reclamations' %}" class="btn btn-edit">Retour</a>
+
 </form>
 {% endblock %}

@@ -3,6 +3,131 @@
 {% block title %}Journal des réclamations{% endblock %}
 
 {% block content %}
+
+<style>
+h1 {
+    margin-bottom: 25px;
+    font-weight: 700;
+}
+
+h2 {
+    margin-top: 40px;
+    margin-bottom: 20px;
+}
+
+.cards-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 25px;
+    margin: 25px 0;
+}
+
+.card {
+    background: linear-gradient(145deg, #ffffff, #f2f4f8);
+    padding: 22px;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    text-align: center;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 18px 35px rgba(0,0,0,0.12);
+}
+
+.card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 5px;
+    width: 100%;
+    background: linear-gradient(90deg, #2c7be5, #6f42c1);
+}
+
+.small-card {
+    padding: 18px;
+}
+
+.card h3,
+.card h4 {
+    font-weight: 600;
+    color: #343a40;
+    margin-bottom: 8px;
+}
+
+.card p {
+    margin: 0;
+    color: #6c757d;
+}
+
+.card-number {
+    font-size: 38px;
+    font-weight: 800;
+    color: #2c7be5;
+    margin: 12px 0;
+}
+
+.btn-delete {
+    display: inline-block;
+    padding: 10px 22px;
+    border-radius: 30px;
+    background: linear-gradient(90deg, #2c7be5, #6f42c1);
+    color: white;
+    text-decoration: none;
+    font-weight: 600;
+    transition: 0.3s;
+}
+
+.btn-delete:hover {
+    opacity: 0.9;
+}
+</style>
+
+<h1>Rapport des réclamations</h1>
+
+<div class="cards-container">
+
+    {% for s in stats_par_etat %}
+    <div class="card">
+        <h3>{{ s.etat_reclamation|capfirst }}</h3>
+        <p class="card-number">{{ s.total }}</p>
+        <p>réclamations</p>
+    </div>
+    {% endfor %}
+
+    <div class="card">
+        <h3>Délai moyen</h3>
+        {% if delai_moyen %}
+            <p class="card-number">{{ delai_moyen.days }}</p>
+            <p>jours</p>
+        {% else %}
+            <p>Aucune réclamation résolue</p>
+        {% endif %}
+    </div>
+
+</div>
+
+<hr>
+
+<h2>Motifs les plus fréquents</h2>
+
+<div class="cards-container">
+    {% for m in motifs_recurrents %}
+    <div class="card small-card">
+        <h4>{{ m.nature_reclamation }}</h4>
+        <p class="card-number">{{ m.total }}</p>
+    </div>
+    {% empty %}
+    <p>Aucun motif trouvé</p>
+    {% endfor %}
+</div>
+
+<br>
+
 <h1>Journal des réclamations</h1>
 
 <div style="display: flex; gap: 10px; margin-bottom: 15px;">
