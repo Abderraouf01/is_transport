@@ -101,12 +101,25 @@ def journal_reclamations(request):
         s['etat_reclamation'] = ETAT_LABELS.get(s['etat_reclamation'], s['etat_reclamation'])
     reclamations_resolues=Reclamation.objects.filter(
         etat_reclamation='resolue',
-        date_resolution__isnull=False
-    )
+    ).exclude(date_resolution= None)
+
     delai_moyen = reclamations_resolues.annotate(
         delai=ExpressionWrapper(F('date_resolution') - F('date_reclamation'), output_field=DurationField())
     ).aggregate(moyenne=Avg('delai'))['moyenne']
+    delai_affiche = None
 
+    if delai_moyen:
+        total_seconds = int(delai_moyen.total_seconds())
+
+        jours = total_seconds // 86400
+        heures = (total_seconds % 86400) // 3600
+        minutes = (total_seconds % 3600) // 60
+
+        delai_affiche = {
+        'jours': jours,
+        'heures': heures,
+        'minutes': minutes
+    }
     motifs_recurrents = Reclamation.objects.values('nature_reclamation') \
         .annotate(total=Count('id')).order_by('-total')
 
@@ -115,6 +128,7 @@ def journal_reclamations(request):
         'clients': Client.objects.all(),
         'stats_par_etat': stats_par_etat,
         'delai_moyen': delai_moyen,
+        'delai_affiche': delai_affiche,
         'motifs_recurrents': motifs_recurrents,
     }
     return render(request, 'core/journal_reclamations.html', context)

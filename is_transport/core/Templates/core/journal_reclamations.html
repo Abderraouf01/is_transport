@@ -101,13 +101,16 @@ h2 {
 
     <div class="card">
         <h3>Délai moyen</h3>
-        {% if delai_moyen %}
-            <p class="card-number">{{ delai_moyen.days }}</p>
-            <p>jours</p>
-        {% else %}
-            <p>Aucune réclamation résolue</p>
-        {% endif %}
-    </div>
+        {% if delai_affiche %}
+        <p class="card-number">
+            {{ delai_affiche.jours }} j
+            {{ delai_affiche.heures }} h
+            {{ delai_affiche.minutes }} min
+        </p>
+    {% else %}
+        <p>Aucune réclamation résolue</p>
+    {% endif %}
+</div>
 
 </div>
 
