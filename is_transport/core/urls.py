@@ -11,15 +11,19 @@ urlpatterns = [
         views.add_colis,
         name='add_colis'
     ),
+   
+
     path('expeditions/<str:tracking>/', views.expedition_detail, name='expedition_detail'),
     path('expedition/<str:tracking>/bon/', views.bon_expedition, name='bon_expedition'),
     path('expedition/<str:tracking>/suivi/', views.expedition_suivi, name='expedition_suivi'),
     
-    path(
-    'expedition/<str:tracking>/statut/<str:code>/',
+  
+   path(
+    'expedition/<str:tracking>/statut/<str:new_statut>/',
     views.expedition_change_statut,
     name='expedition_change_statut'
-),
+    ),
+
 
     path('',views.home , name='home'),
 

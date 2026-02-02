@@ -1,34 +1,45 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Ajouter Colis</title>
-</head>
-<body>
+{% extends 'core/base.html' %}
 
-<h2>Ajouter un colis à l’expédition {{ expedition.tracking }}</h2>
+{% block title %}Ajouter un colis{% endblock %}
+
+{% block content %}
+<h1>Ajouter un colis</h1>
+
+<p>
+    <strong>Expédition :</strong> {{ expedition.tracking }}
+</p>
 
 <form method="post">
     {% csrf_token %}
 
-    <label>ID Colis:</label><br>
-    <input type="text" name="id_colis" required><br><br>
+    <p>
+        <label for="id_colis">ID Colis</label>
+        <input type="text" name="id_colis" id="id_colis" required>
+    </p>
 
-    <label>Poids:</label><br>
-    <input type="number" step="0.01" name="poids" required><br><br>
+    <p>
+        <label for="poids">Poids (kg)</label>
+        <input type="number" step="0.01" name="poids" id="poids" required>
+    </p>
 
-    <label>Volume:</label><br>
-    <input type="number" step="0.01" name="volume" required><br><br>
+    <p>
+        <label for="volume">Volume (m³)</label>
+        <input type="number" step="0.01" name="volume" id="volume" required>
+    </p>
 
-    <label>Description:</label><br>
-    <textarea name="description"></textarea><br><br>
+    <p>
+        <label for="description">Description</label>
+        <textarea name="description" id="description"></textarea>
+    </p>
 
-    <button type="submit">Ajouter</button>
+    <div style="margin-top:20px;">
+        <button type="submit" class="btn btn-add">
+            Ajouter
+        </button>
+
+        <a href="{% url 'expedition_detail' expedition.tracking %}" class="btn btn-edit">
+            Annuler
+        </a>
+    </div>
 </form>
-
-<br>
-<a href="{% url 'expedition_detail' expedition.tracking %}">
-    Retour à l’expédition
-</a>
-
-</body>
-</html>
+{% endblock %}

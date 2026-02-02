@@ -174,7 +174,7 @@ def tournee_create(request):
 def add_colis(request, tracking):
     expedition = get_object_or_404(Expedition, tracking=tracking)
 
-    if not expedition.can_add_colis():
+    if not expedition.can_add_colis:
         return redirect('expedition_detail', tracking=tracking)
 
     if request.method == 'POST':
@@ -467,20 +467,30 @@ def expedition_change_statut(request, tracking, new_statut):
 
     return redirect('expedition_detail', tracking=tracking)
 
+from django.shortcuts import render, get_object_or_404, redirect
+from .models import Expedition, Colis
+
 def add_colis(request, tracking):
     expedition = get_object_or_404(Expedition, tracking=tracking)
 
-    if not expedition.can_add_colis():
+    # شرط business logic
+    if not expedition.can_add_colis:
         return redirect('expedition_detail', tracking=tracking)
 
     if request.method == 'POST':
-        form = IncidentForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('incident_list')
-    else:
-        form = IncidentForm()
-    return render(request, 'core/incident_form.html', {'form': form})
+        Colis.objects.create(
+            id_colis=request.POST['id_colis'],
+            poids_colis=request.POST['poids'],
+            volume_colis=request.POST['volume'],
+            description_colis=request.POST.get('description', ''),
+            expedition=expedition
+        )
+        return redirect('expedition_detail', tracking=tracking)
+
+    return render(request, 'core/add_colis.html', {
+        'expedition': expedition
+    })
+
 
 def incident_list(request):
     incidents = Incident.objects.all()

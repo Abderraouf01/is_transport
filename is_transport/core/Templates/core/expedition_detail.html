@@ -31,8 +31,15 @@
 </table>
 
 {% if expedition.can_add_colis %}
-<a class="btn btn-add" href="{% url 'add_colis' expedition.tracking %}">Ajouter colis</a>
+    <a href="{% url 'add_colis' expedition.tracking %}" class="btn btn-add">
+        + Ajouter colis
+    </a>
+{% else %}
+    <span style="color: gray; font-size: 12px;">
+        Impossible d'ajouter un colis (statut ≠ crée)
+    </span>
 {% endif %}
+
 
 <h2>Changer statut</h2>
 

@@ -182,11 +182,10 @@ class Tarification(models.Model):
     destination = models.ForeignKey(Destination,on_delete=models.CASCADE,related_name='tarifications')
     tarif_poids = models.DecimalField(max_digits=10, decimal_places=2)
     tarif_volume = models.DecimalField(max_digits=10, decimal_places=2)
-    tarif_final = models.DecimalField(max_digits=10, decimal_places=2)
 
 
     def __str__(self):
-     return f"Tarif {self.type_service.nom_service} → {self.destination.ville_dest} : {self.tarif_final}"
+        return f"Tarification {self.type_service.nom_service} - {self.destination.ville_dest}"
 
 
 
@@ -219,6 +218,14 @@ class Expedition(models.Model):
         type_service = self.tarification.type_service
         tarif_base_reel = destination.tarif_base * type_service.coefficient_service
         return tarif_base_reel + (total_poids * self.tarification.tarif_poids) + (total_volume * self.tarification.tarif_volume)
+     
+   def save(self, *args, **kwargs):
+      super().save(*args, **kwargs) 
+
+ 
+      self.montant_expedition = self.calculer_montant()
+ 
+      super().save(update_fields=['montant_expedition'])
 
    def save(self, *args, **kwargs):
     if not self.tracking:
@@ -238,15 +245,15 @@ class Expedition(models.Model):
         )
 
 
-
+   @property
+   def can_add_colis(self):
+        return self.statut_expedition == 'cree'
 
 
 
    def can_be_deleted(self):
     return self.tournee is None and self.facture is None
-   @property
-   def can_add_colis(self):
-    return self.statut_expedition == 'cree'
+   
    @property
    def can_change_statut(self):
     return self.statut_expedition not in ['livre', 'echec']
@@ -257,7 +264,7 @@ class Expedition(models.Model):
 
    
    def change_statut(self, new_statut):
-      if not self.can_change_statut(new_statut):
+      if not self.can_change_statut:
         raise ValueError("Transition de statut non autorisée")
 
       self.statut_expedition = new_statut

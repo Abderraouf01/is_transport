@@ -11,7 +11,6 @@
             <th>Destination</th>
             <th>Tarif poids</th>
             <th>Tarif volume</th>
-            <th>Tarif final</th>
             <th>Actions</th>
         </tr>
     </thead>
@@ -22,7 +21,6 @@
             <td>{{ tarification.Destination.ville_dest }} ( {{ tarification.destination.pays_dest }})</td>
             <td>{{ tarification.tarif_poids }}</td>
             <td>{{ tarification.tarif_volume }}</td>
-            <td>{{ tarification.tarif_final }}</td>
             <td>
                 <a href="{% url 'tarification_update' tarification.pk %}" class="btn btn-sm btn-warning">Modifier</a>
                 <a href="{% url 'tarification_delete' tarification.pk %}" class="btn btn-sm btn-danger">Supprimer</a>
