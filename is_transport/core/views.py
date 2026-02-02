@@ -17,6 +17,8 @@ from django.shortcuts import get_object_or_404,redirect
 from decimal import Decimal
 from .forms import PaiementForm
 from .forms import ReclamationForm
+from django.utils import timezone
+
 
 
 
@@ -672,14 +674,21 @@ def add_colis_to_reclamation(request, id_reclamation):
                 reclamation=reclamation,
                 colis=colis
             )
-
     return redirect('detail_reclamation', id_reclamation=id_reclamation)
+
 def changer_etat_reclamation(request, id_reclamation):
     reclamation = get_object_or_404(Reclamation, id_reclamation=id_reclamation)
 
     if request.method == 'POST':
         nouvel_etat = request.POST.get('etat')
-        reclamation.changer_etat(nouvel_etat, agent=request.user)
+        reclamation.etat_reclamation = nouvel_etat
+
+        if nouvel_etat == 'resolue':
+            reclamation.date_resolution = timezone.now()
+        else:
+            reclamation.date_resolution = None
+
+        reclamation.save()
 
     return redirect('detail_reclamation', id_reclamation=id_reclamation)
 

@@ -283,8 +283,8 @@ class Reclamation(models.Model):
     ]
     id_reclamation = models.CharField(max_length=20, unique=True)
     nature_reclamation = models.CharField(max_length=150)
-    date_reclamation = models.DateField(auto_now_add=True)
-    date_resolution = models.DateField(null=True, blank=True)
+    date_reclamation = models.DateTimeField(auto_now_add=True)
+    date_resolution = models.DateTimeField(null=True, blank=True)
     etat_reclamation = models.CharField(max_length=20,choices=ETAT_CHOICES,default='en_cours' )
     client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='reclamations')
     expedition = models.ForeignKey(Expedition,to_field='tracking',on_delete=models.PROTECT,null=True,blank=True,related_name='reclamations')  
