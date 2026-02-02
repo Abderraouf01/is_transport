@@ -219,13 +219,7 @@ class Expedition(models.Model):
         tarif_base_reel = destination.tarif_base * type_service.coefficient_service
         return tarif_base_reel + (total_poids * self.tarification.tarif_poids) + (total_volume * self.tarification.tarif_volume)
      
-   def save(self, *args, **kwargs):
-      super().save(*args, **kwargs) 
-
- 
-      self.montant_expedition = self.calculer_montant()
- 
-      super().save(update_fields=['montant_expedition'])
+  
 
    def save(self, *args, **kwargs):
     if not self.tracking:
@@ -233,6 +227,7 @@ class Expedition(models.Model):
         is_new = True
     else:
         is_new = False
+    self.montant_expedition = self.calculer_montant()
 
     super().save(*args, **kwargs)
 

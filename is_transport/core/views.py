@@ -187,7 +187,6 @@ def add_colis(request, tracking):
             description_colis=request.POST['description'],
             expedition=expedition
         )
-
         expedition.save()
 
         return redirect('expedition_detail', tracking=tracking)
@@ -195,6 +194,7 @@ def add_colis(request, tracking):
     return render(request, 'core/add_colis.html', {
         'expedition': expedition
     })
+
 
 
 
